@@ -15,7 +15,19 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       const response = await api.get('/reports/dashboard');
-      setStats(response.data);
+      const data = response.data;
+      
+      // Merge monthly income and expenditure data
+      const mergedMonthlyData = data.monthlyIncome.map((incomeItem, index) => {
+        const expenditureItem = data.monthlyExpenditure[index] || { amount: 0 };
+        return {
+          month: incomeItem.month,
+          income: incomeItem.amount,
+          expenditure: expenditureItem.amount
+        };
+      });
+      
+      setStats({ ...data, mergedMonthlyData });
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
@@ -56,11 +68,40 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Collected</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalCollected?.toFixed(2)}</p>
+              <p className="text-2xl font-semibold text-gray-900">GHS {stats.totalCollected?.toFixed(2)}</p>
             </div>
           </div>
         </div>
 
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 bg-orange-500 rounded-md p-3">
+              <span className="text-white text-2xl">💸</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Total Spent</p>
+              <p className="text-2xl font-semibold text-gray-900">GHS {stats.totalSpent?.toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
+              <span className="text-white text-2xl">📊</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Balance</p>
+              <p className={`text-2xl font-semibold ${(stats.balanceRemaining || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                GHS {stats.balanceRemaining?.toFixed(2)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-red-500 rounded-md p-3">
@@ -75,7 +116,7 @@ const Dashboard = () => {
 
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
+            <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
               <span className="text-white text-2xl">👤</span>
             </div>
             <div className="ml-4">
@@ -89,30 +130,32 @@ const Dashboard = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Monthly Income Trend</h2>
+          <h2 className="text-xl font-semibold mb-4">Monthly Collections vs Expenditures</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={stats.monthlyIncome}>
+            <BarChart data={stats.mergedMonthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="amount" stroke="#8884d8" name="Amount" />
-            </LineChart>
+              <Bar dataKey="income" fill="#10b981" name="Income" />
+              <Bar dataKey="expenditure" fill="#f97316" name="Expenditure" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Monthly Income (Bar Chart)</h2>
+          <h2 className="text-xl font-semibold mb-4">Monthly Trends</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.monthlyIncome}>
+            <LineChart data={stats.mergedMonthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="amount" fill="#8884d8" name="Amount" />
-            </BarChart>
+              <Line type="monotone" dataKey="income" stroke="#10b981" name="Income" />
+              <Line type="monotone" dataKey="expenditure" stroke="#f97316" name="Expenditure" />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>

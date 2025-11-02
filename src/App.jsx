@@ -9,6 +9,7 @@ import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Members from './pages/Members.jsx';
 import Payments from './pages/Payments.jsx';
+import Expenditure from './pages/Expenditure.jsx';
 import Reports from './pages/Reports.jsx';
 import ActivityLogs from './pages/ActivityLogs.jsx';
 import Settings from './pages/Settings.jsx';
@@ -45,6 +46,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Payments />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expenditure"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Expenditure />
                 </Layout>
               </ProtectedRoute>
             }

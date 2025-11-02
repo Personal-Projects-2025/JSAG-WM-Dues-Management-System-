@@ -16,6 +16,7 @@ const Layout = ({ children }) => {
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/members', label: 'Members', icon: '👥' },
     { path: '/payments', label: 'Payments', icon: '💰' },
+    { path: '/expenditure', label: 'Expenditure', icon: '💸' },
     { path: '/reports', label: 'Reports', icon: '📈' },
     { path: '/activity-logs', label: 'Activity Logs', icon: '📝' }
   ];

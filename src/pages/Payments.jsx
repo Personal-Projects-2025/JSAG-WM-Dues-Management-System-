@@ -5,8 +5,13 @@ import { toast } from 'react-toastify';
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [members, setMembers] = useState([]);
+  const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [receiptModal, setReceiptModal] = useState(false);
+  const [latestReceipt, setLatestReceipt] = useState(null);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [filteredMembers, setFilteredMembers] = useState([]);
   const [filters, setFilters] = useState({
     memberId: '',
     startDate: '',
@@ -22,11 +27,26 @@ const Payments = () => {
   useEffect(() => {
     fetchMembers();
     fetchPayments();
+    fetchReceipts();
   }, []);
 
   useEffect(() => {
     fetchPayments();
   }, [filters]);
+
+  useEffect(() => {
+    // Filter members based on search query
+    if (memberSearch) {
+      const filtered = members.filter(member =>
+        member.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+        member.memberId?.toLowerCase().includes(memberSearch.toLowerCase()) ||
+        member.contact?.toLowerCase().includes(memberSearch.toLowerCase())
+      );
+      setFilteredMembers(filtered);
+    } else {
+      setFilteredMembers(members);
+    }
+  }, [memberSearch, members]);
 
   const fetchMembers = async () => {
     try {
@@ -54,12 +74,30 @@ const Payments = () => {
     }
   };
 
+  const fetchReceipts = async () => {
+    try {
+      const response = await api.get('/receipts');
+      setReceipts(response.data);
+    } catch (error) {
+      // Silently fail if receipts can't be loaded
+      console.error('Failed to load receipts:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/payments', formData);
+      const response = await api.post('/payments', formData);
       toast.success('Payment recorded successfully');
       setShowModal(false);
+      setMemberSearch(''); // Reset search when modal closes
+      
+      // Store receipt info and show receipt modal
+      if (response.data.receipt) {
+        setLatestReceipt(response.data.receipt);
+        setReceiptModal(true);
+      }
+      
       setFormData({
         memberId: '',
         amount: '',
@@ -67,9 +105,34 @@ const Payments = () => {
       });
       fetchPayments();
       fetchMembers();
+      fetchReceipts();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to record payment');
     }
+  };
+
+  const handleDownloadReceipt = async (receiptId) => {
+    try {
+      const response = await api.get(`/receipts/pdf/${receiptId}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `receipt-${receiptId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('Receipt downloaded successfully');
+    } catch (error) {
+      toast.error('Failed to download receipt');
+    }
+  };
+
+  const getReceiptForPayment = (paymentId) => {
+    return receipts.find(receipt => receipt.paymentId?.toString() === paymentId?.toString());
   };
 
   if (loading) {
@@ -81,7 +144,10 @@ const Payments = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setShowModal(true);
+            setMemberSearch(''); // Reset search when opening modal
+          }}
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
         >
           Record Payment
@@ -159,28 +225,47 @@ const Payments = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Recorded By
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Receipt
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {payments.map((payment) => (
-                <tr key={payment._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {payment.memberName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {payment.amount}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(payment.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {payment.monthsCovered}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {payment.recordedBy}
-                  </td>
-                </tr>
-              ))}
+              {payments.map((payment) => {
+                const receipt = getReceiptForPayment(payment._id);
+                return (
+                  <tr key={payment._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {payment.memberName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      GHS {payment.amount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(payment.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {payment.monthsCovered}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {payment.recordedBy}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {receipt ? (
+                        <button
+                          onClick={() => handleDownloadReceipt(receipt.receiptId)}
+                          className="text-blue-600 hover:text-blue-900 flex items-center"
+                          title="Download Receipt"
+                        >
+                          🧾 <span className="ml-1">Download</span>
+                        </button>
+                      ) : (
+                        <span className="text-gray-400">N/A</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -191,24 +276,34 @@ const Payments = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-bold mb-4">Record Payment</h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Member *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Search Member *</label>
+                <input
+                  type="text"
+                  placeholder="Search by name, ID, or contact..."
+                  value={memberSearch}
+                  onChange={(e) => setMemberSearch(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                />
                 <select
                   required
                   value={formData.memberId}
                   onChange={(e) => setFormData({ ...formData, memberId: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md max-h-40 overflow-y-auto"
                 >
                   <option value="">Select Member</option>
-                  {members.map((member) => (
+                  {filteredMembers.map((member) => (
                     <option key={member._id} value={member._id}>
-                      {member.name} (Dues: {member.duesPerMonth}/month)
+                      {member.name} - Dues: GHS {member.duesPerMonth}/month {member.memberId ? `(${member.memberId})` : ''}
                     </option>
                   ))}
                 </select>
+                {filteredMembers.length === 0 && memberSearch && (
+                  <p className="mt-1 text-sm text-red-600">No members found matching "{memberSearch}"</p>
+                )}
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Amount *</label>
@@ -233,7 +328,10 @@ const Payments = () => {
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setMemberSearch(''); // Reset search when modal closes
+                  }}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
@@ -246,6 +344,45 @@ const Payments = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Receipt Modal */}
+      {receiptModal && latestReceipt && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-bold mb-4">🧾 Payment Receipt</h3>
+            <p className="mb-4 text-gray-700">
+              Payment recorded successfully! Would you like to download the receipt?
+            </p>
+            <div className="bg-gray-50 p-3 rounded mb-4">
+              <p className="text-sm text-gray-600">
+                <strong>Receipt ID:</strong> {latestReceipt.receiptId}
+              </p>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setReceiptModal(false);
+                  setLatestReceipt(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Later
+              </button>
+              <button
+                onClick={() => {
+                  handleDownloadReceipt(latestReceipt.receiptId);
+                  setReceiptModal(false);
+                  setLatestReceipt(null);
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Download PDF
+              </button>
+            </div>
           </div>
         </div>
       )}
