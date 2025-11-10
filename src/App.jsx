@@ -13,6 +13,8 @@ import Expenditure from './pages/Expenditure.jsx';
 import Reports from './pages/Reports.jsx';
 import ActivityLogs from './pages/ActivityLogs.jsx';
 import Settings from './pages/Settings.jsx';
+import Subgroups from './pages/Subgroups.jsx';
+import SubgroupLeaderboard from './pages/SubgroupLeaderboard.jsx';
 
 function App() {
   return (
@@ -66,6 +68,26 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Reports />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subgroups"
+            element={
+              <ProtectedRoute requireSuper={true}>
+                <Layout>
+                  <Subgroups />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SubgroupLeaderboard />
                 </Layout>
               </ProtectedRoute>
             }

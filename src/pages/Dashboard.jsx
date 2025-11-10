@@ -43,6 +43,14 @@ const Dashboard = () => {
     return <div className="text-center py-12">No data available</div>;
   }
 
+  const subgroupStats = stats.subgroupStats || [];
+  const rankedSubgroups = subgroupStats.filter((sg) => sg.id !== 'unassigned');
+  const unassignedStat = subgroupStats.find((sg) => sg.id === 'unassigned');
+  const topCompetitiveSubgroup = rankedSubgroups.length > 0 ? rankedSubgroups[0] : null;
+  const totalSubgroupCollected = rankedSubgroups.reduce((sum, sg) => sum + sg.totalCollected, 0);
+  const leaderboardPreview = rankedSubgroups.slice(0, 3);
+  const maxSubgroupTotal = rankedSubgroups.length > 0 ? Math.max(...rankedSubgroups.map((sg) => sg.totalCollected)) : 0;
+
   return (
     <div className="px-4 py-6">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
@@ -101,7 +109,7 @@ const Dashboard = () => {
       </div>
 
       {/* Additional Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-red-500 rounded-md p-3">
@@ -122,6 +130,50 @@ const Dashboard = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Admins</p>
               <p className="text-2xl font-semibold text-gray-900">{stats.totalAdmins}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+              <span className="text-white text-2xl">🏆</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Top Subgroup</p>
+              {topCompetitiveSubgroup ? (
+                <>
+                  <p className="text-lg font-semibold text-gray-900">{topCompetitiveSubgroup.name}</p>
+                  <p className="text-sm text-gray-500">
+                    GHS {topCompetitiveSubgroup.totalCollected.toFixed(2)} collected
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Avg per member: GHS {topCompetitiveSubgroup.averagePerMember.toFixed(2)}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500">Assign members to subgroups to start tracking.</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 bg-teal-500 rounded-md p-3">
+              <span className="text-white text-2xl">💼</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Subgroup Contributions</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                GHS {totalSubgroupCollected.toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500">
+                {rankedSubgroups.length} active subgroup{rankedSubgroups.length === 1 ? '' : 's'}
+                {unassignedStat?.totalMembers
+                  ? ` • ${unassignedStat.totalMembers} unassigned member${unassignedStat.totalMembers === 1 ? '' : 's'}`
+                  : ''}
+              </p>
             </div>
           </div>
         </div>
@@ -158,6 +210,58 @@ const Dashboard = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* Subgroup Performance */}
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-xl font-semibold">Subgroup Performance</h2>
+            <p className="text-sm text-gray-500">
+              Ranked by total dues collected across all members.
+            </p>
+          </div>
+          <Link
+            to="/leaderboard"
+            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            View Leaderboard →
+          </Link>
+        </div>
+        {rankedSubgroups.length === 0 ? (
+          <p className="text-gray-500">No subgroup contributions yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {leaderboardPreview.map((subgroup, index) => {
+              const percentage = maxSubgroupTotal > 0 ? (subgroup.totalCollected / maxSubgroupTotal) * 100 : 0;
+              return (
+                <div key={subgroup.id}>
+                  <div className="flex justify-between text-sm font-medium text-gray-700">
+                    <span>
+                      #{index + 1} {subgroup.name}
+                    </span>
+                    <span>GHS {subgroup.totalCollected.toFixed(2)}</span>
+                  </div>
+                  <div className="mt-1 h-2 w-full bg-gray-200 rounded-full">
+                    <div
+                      className="h-2 rounded-full bg-blue-500"
+                      style={{ width: `${percentage}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Members: {subgroup.totalMembers} • Avg: GHS {subgroup.averagePerMember.toFixed(2)}
+                  </p>
+                </div>
+              );
+            })}
+            {rankedSubgroups.length > leaderboardPreview.length && (
+              <p className="text-xs text-gray-500">
+                + {rankedSubgroups.length - leaderboardPreview.length} more subgroup
+                {rankedSubgroups.length - leaderboardPreview.length === 1 ? '' : 's'} contributing
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Quick Links */}

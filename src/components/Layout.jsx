@@ -22,6 +22,15 @@ const Layout = ({ children }) => {
   ];
 
   if (user?.role === 'super') {
+    navItems.splice(3, 0, { path: '/subgroups', label: 'Subgroups', icon: '🧩' });
+  }
+
+  const activityIndex = navItems.findIndex((item) => item.path === '/activity-logs');
+  if (activityIndex !== -1) {
+    navItems.splice(activityIndex, 0, { path: '/leaderboard', label: 'Leaderboard', icon: '🏅' });
+  }
+
+  if (user?.role === 'super') {
     navItems.push({ path: '/settings', label: 'Settings', icon: '⚙️' });
   }
 

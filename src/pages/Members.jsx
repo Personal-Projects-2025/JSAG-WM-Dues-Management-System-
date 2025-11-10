@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 
 const Members = () => {
   const [members, setMembers] = useState([]);
+  const [subgroups, setSubgroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -13,11 +14,13 @@ const Members = () => {
     memberId: '',
     contact: '',
     joinDate: new Date().toISOString().split('T')[0],
-    duesPerMonth: ''
+    duesPerMonth: '',
+    subgroupId: ''
   });
 
   useEffect(() => {
     fetchMembers();
+    fetchSubgroups();
   }, []);
 
   const fetchMembers = async () => {
@@ -28,6 +31,15 @@ const Members = () => {
       toast.error('Failed to load members');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubgroups = async () => {
+    try {
+      const response = await api.get('/subgroups');
+      setSubgroups(response.data);
+    } catch (error) {
+      toast.error('Failed to load subgroups');
     }
   };
 
@@ -55,7 +67,8 @@ const Members = () => {
         memberId: '',
         contact: '',
         joinDate: new Date().toISOString().split('T')[0],
-        duesPerMonth: ''
+        duesPerMonth: '',
+        subgroupId: ''
       });
       fetchMembers();
     } catch (error) {
@@ -70,7 +83,8 @@ const Members = () => {
       memberId: member.memberId || '',
       contact: member.contact || '',
       joinDate: member.joinDate ? new Date(member.joinDate).toISOString().split('T')[0] : '',
-      duesPerMonth: member.duesPerMonth
+      duesPerMonth: member.duesPerMonth,
+      subgroupId: member.subgroupId?._id || member.subgroupId || ''
     });
     setShowModal(true);
   };
@@ -93,6 +107,7 @@ const Members = () => {
 Name: ${member.name}
 Member ID: ${member.memberId || 'N/A'}
 Contact: ${member.contact || 'N/A'}
+Subgroup: ${member.subgroupId?.name || 'Unassigned'}
 Join Date: ${new Date(member.joinDate).toLocaleDateString()}
 Dues Per Month: ${member.duesPerMonth}
 Total Paid: ${member.totalPaid}
@@ -119,7 +134,8 @@ Last Payment: ${member.lastPaymentDate ? new Date(member.lastPaymentDate).toLoca
               memberId: '',
               contact: '',
               joinDate: new Date().toISOString().split('T')[0],
-              duesPerMonth: ''
+              duesPerMonth: '',
+              subgroupId: ''
             });
             setShowModal(true);
           }}
@@ -155,7 +171,8 @@ Last Payment: ${member.lastPaymentDate ? new Date(member.lastPaymentDate).toLoca
                   </div>
                   <p className="text-sm text-gray-500">
                     ID: {member.memberId || 'N/A'} | Contact: {member.contact || 'N/A'} | 
-                    Total Paid: {member.totalPaid} | Months Covered: {member.monthsCovered}
+                    Total Paid: {member.totalPaid} | Months Covered: {member.monthsCovered} | Subgroup:{' '}
+                    {member.subgroupId?.name || 'Unassigned'}
                   </p>
                 </div>
                 <div className="flex space-x-2">
@@ -218,6 +235,21 @@ Last Payment: ${member.lastPaymentDate ? new Date(member.lastPaymentDate).toLoca
                   onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Subgroup</label>
+                <select
+                  value={formData.subgroupId}
+                  onChange={(e) => setFormData({ ...formData, subgroupId: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md max-h-40 overflow-y-auto"
+                >
+                  <option value="">Unassigned</option>
+                  {subgroups.map((subgroup) => (
+                    <option key={subgroup._id} value={subgroup._id}>
+                      {subgroup.name} ({Number(subgroup.totalCollected || 0).toFixed(2)})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Join Date</label>
