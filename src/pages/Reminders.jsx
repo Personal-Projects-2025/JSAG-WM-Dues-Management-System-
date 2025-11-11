@@ -8,7 +8,6 @@ import {
   Filter,
   Loader2,
   MailOpen,
-  RefreshCw,
   Search,
   Send,
   Users,

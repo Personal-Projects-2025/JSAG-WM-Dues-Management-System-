@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import {
   flexRender,
@@ -376,38 +376,39 @@ const Members = () => {
     subgroupId: ''
   });
 
-  useEffect(() => {
-    fetchMembers();
-    fetchSubgroups();
-  }, []);
-
-  const fetchMembers = async (term = searchTerm) => {
+  const fetchMembers = useCallback(async (term) => {
     try {
       setLoading(true);
-      const response = await api.get(`/members${term ? `?search=${term}` : ''}`);
+      const query = term !== undefined ? term : searchTerm;
+      const response = await api.get(`/members${query ? `?search=${query}` : ''}`);
       setMembers(response.data);
     } catch (error) {
       toast.error('Failed to load members');
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm]);
 
-  const fetchSubgroups = async () => {
+  const fetchSubgroups = useCallback(async () => {
     try {
       const response = await api.get('/subgroups');
       setSubgroups(response.data);
     } catch (error) {
       toast.error('Failed to load subgroups');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchMembers();
+    fetchSubgroups();
+  }, [fetchMembers, fetchSubgroups]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchMembers(searchTerm);
+      fetchMembers();
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm]);
+  }, [fetchMembers]);
 
   const resetForm = () => {
     setFormData({
@@ -440,7 +441,7 @@ const Members = () => {
     }
   };
 
-  const handleEdit = (member) => {
+  const handleEdit = useCallback((member) => {
     setEditingMember(member);
     setFormData({
       name: member.name,
@@ -452,9 +453,9 @@ const Members = () => {
       subgroupId: member.subgroupId?._id || member.subgroupId || ''
     });
     setFormOpen(true);
-  };
+  }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = useCallback(async (id) => {
     if (window.confirm('Are you sure you want to delete this member?')) {
       try {
         await api.delete(`/members/${id}`);
@@ -464,12 +465,12 @@ const Members = () => {
         toast.error('Failed to delete member');
       }
     }
-  };
+  }, [fetchMembers]);
 
-  const openDetail = (member) => {
+  const openDetail = useCallback((member) => {
     setSelectedMember(member);
     setDetailOpen(true);
-  };
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -595,7 +596,7 @@ const Members = () => {
         }
       }
     ],
-    []
+    [openDetail, handleEdit, handleDelete]
   );
 
   const table = useReactTable({

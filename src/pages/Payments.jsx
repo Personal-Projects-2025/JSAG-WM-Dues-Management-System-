@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Combobox, Dialog, Transition } from '@headlessui/react';
 import { toast } from 'react-toastify';
 import clsx from 'clsx';
@@ -57,26 +57,16 @@ const Payments = () => {
   const [tablePage, setTablePage] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
-  useEffect(() => {
-    fetchMembers();
-    fetchPayments();
-    fetchReceipts();
-  }, []);
-
-  useEffect(() => {
-    fetchPayments();
-  }, [filters]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       const response = await api.get('/members');
       setMembers(response.data);
     } catch (error) {
       toast.error('Failed to load members');
     }
-  };
+  }, []);
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -92,11 +82,26 @@ const Payments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  const fetchReceipts = useCallback(async () => {
+    try {
+      const response = await api.get('/receipts');
+      setReceipts(response.data);
+    } catch (error) {
+      console.error('Failed to load receipts:', error);
+    }
+  }, []);
 
   useEffect(() => {
-    setTablePage(0);
-  }, [payments.length]);
+    fetchMembers();
+    fetchPayments();
+    fetchReceipts();
+  }, [fetchMembers, fetchPayments, fetchReceipts]);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
 
   const paginatedPayments = useMemo(() => {
     const start = tablePage * tablePageSize;
@@ -104,15 +109,6 @@ const Payments = () => {
   }, [payments, tablePage, tablePageSize]);
 
   const pageCount = Math.max(1, Math.ceil((payments.length || 1) / tablePageSize));
-
-  const fetchReceipts = async () => {
-    try {
-      const response = await api.get('/receipts');
-      setReceipts(response.data);
-    } catch (error) {
-      console.error('Failed to load receipts:', error);
-    }
-  };
 
   const filteredMembers = useMemo(() => {
     if (!memberQuery) return members;
