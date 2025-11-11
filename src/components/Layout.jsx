@@ -1,82 +1,94 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
+import {
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  Wallet,
+  Layers,
+  Trophy,
+  BarChart2,
+  Bell,
+  ClipboardList,
+  Settings as SettingsIcon
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import Sidebar from './Sidebar.jsx';
+import TopBar from './TopBar.jsx';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/members', label: 'Members', icon: '👥' },
-    { path: '/payments', label: 'Payments', icon: '💰' },
-    { path: '/expenditure', label: 'Expenditure', icon: '💸' },
-    { path: '/reports', label: 'Reports', icon: '📈' },
-    { path: '/activity-logs', label: 'Activity Logs', icon: '📝' }
+  const navItems = useMemo(() => {
+    const baseItems = [
+      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { path: '/members', label: 'Members', icon: Users },
+      { path: '/payments', label: 'Payments', icon: CreditCard },
+      { path: '/expenditure', label: 'Expenditure', icon: Wallet },
+      { path: '/reminders', label: 'Reminders', icon: Bell },
+      { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+      { path: '/reports', label: 'Reports', icon: BarChart2 },
+      { path: '/activity-logs', label: 'Activity Logs', icon: ClipboardList }
   ];
 
   if (user?.role === 'super') {
-    navItems.splice(3, 0, { path: '/subgroups', label: 'Subgroups', icon: '🧩' });
+      baseItems.splice(4, 0, {
+        path: '/subgroups',
+        label: 'Subgroups',
+        icon: Layers,
+        roles: ['super']
+      });
+      baseItems.push({
+        path: '/settings',
+        label: 'Settings',
+        icon: SettingsIcon,
+        roles: ['super']
+      });
   }
 
-  const activityIndex = navItems.findIndex((item) => item.path === '/activity-logs');
-  if (activityIndex !== -1) {
-    navItems.splice(activityIndex, 0, { path: '/leaderboard', label: 'Leaderboard', icon: '🏅' });
-  }
+    return baseItems.filter((item) => {
+      if (!item.roles) return true;
+      return item.roles.includes(user?.role);
+    });
+  }, [user]);
 
-  if (user?.role === 'super') {
-    navItems.push({ path: '/settings', label: 'Settings', icon: '⚙️' });
-  }
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed((prev) => !prev);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-blue-600">Group Dues</h1>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                      location.pathname === item.path
-                        ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    }`}
+    <div className="min-h-screen bg-slate-50 lg:flex">
+      <Sidebar
+        navItems={navItems}
+        isCollapsed={isSidebarCollapsed}
+        onCollapseToggle={toggleSidebarCollapse}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={() => setIsMobileSidebarOpen(false)}
+      />
+
+      <div
+        className={clsx(
+          'flex flex-1 flex-col min-h-screen transition-[margin] duration-200',
+          isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        )}
                   >
-                    <span className="mr-2">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-700 mr-4">
-                {user?.username} ({user?.role})
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
+        <TopBar
+          onMobileToggle={() => setIsMobileSidebarOpen(true)}
+          user={user}
+          onLogout={handleLogout}
+        />
+
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
           </div>
-        </div>
-      </nav>
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {children}
-      </main>
     </div>
   );
 };

@@ -15,6 +15,7 @@ import ActivityLogs from './pages/ActivityLogs.jsx';
 import Settings from './pages/Settings.jsx';
 import Subgroups from './pages/Subgroups.jsx';
 import SubgroupLeaderboard from './pages/SubgroupLeaderboard.jsx';
+import Reminders from './pages/Reminders.jsx';
 
 function App() {
   return (
@@ -88,6 +89,26 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <SubgroupLeaderboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reminders"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Reminders />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reminders"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Reminders />
                 </Layout>
               </ProtectedRoute>
             }
