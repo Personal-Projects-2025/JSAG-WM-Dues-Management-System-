@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { toast } from 'react-toastify';
 import {
@@ -41,7 +41,7 @@ const ActivityLogs = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -57,11 +57,11 @@ const ActivityLogs = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiFilters]);
 
   useEffect(() => {
     fetchLogs();
-  }, [apiFilters]);
+  }, [fetchLogs]);
 
   useEffect(() => {
     if (filterOpen) {
@@ -117,7 +117,7 @@ const ActivityLogs = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = useCallback(async (id) => {
     if (!window.confirm('Delete this log entry? This action cannot be undone.')) return;
     try {
       await api.delete(`/logs/${id}`);
@@ -126,7 +126,7 @@ const ActivityLogs = () => {
     } catch (error) {
       toast.error('Failed to delete log');
     }
-  };
+  }, [fetchLogs]);
 
   const uniqueActors = new Set(logs.map((log) => log.actor)).size;
   const latestLog = logs

@@ -83,7 +83,6 @@ const Dashboard = () => {
   const rankedSubgroups = subgroupStats.filter((sg) => sg.id !== 'unassigned');
   const unassignedStat = subgroupStats.find((sg) => sg.id === 'unassigned');
   const topCompetitiveSubgroup = rankedSubgroups.length > 0 ? rankedSubgroups[0] : null;
-  const totalSubgroupCollected = rankedSubgroups.reduce((sum, sg) => sum + sg.totalCollected, 0);
   const leaderboardPreview = rankedSubgroups.slice(0, 3);
   const maxSubgroupTotal = rankedSubgroups.length > 0 ? Math.max(...rankedSubgroups.map((sg) => sg.totalCollected)) : 0;
   const outstandingMembers = reminderSummary?.totalOutstandingMembers || 0;
