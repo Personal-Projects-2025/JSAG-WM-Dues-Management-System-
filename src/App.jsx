@@ -16,13 +16,21 @@ import Settings from './pages/Settings.jsx';
 import Subgroups from './pages/Subgroups.jsx';
 import SubgroupLeaderboard from './pages/SubgroupLeaderboard.jsx';
 import Reminders from './pages/Reminders.jsx';
+import TenantRegistration from './pages/TenantRegistration.jsx';
+import TenantManagement from './pages/TenantManagement.jsx';
+import MultiAdminDashboard from './pages/MultiAdminDashboard.jsx';
+import SystemSettings from './pages/SystemSettings.jsx';
+import TenantBranding from './components/TenantBranding.jsx';
+import RootRedirect from './components/RootRedirect.jsx';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+      <TenantBranding>
+        <Router>
+          <Routes>
+            <Route path="/register" element={<TenantRegistration />} />
+            <Route path="/login" element={<Login />} />
           <Route
             path="/dashboard"
             element={
@@ -133,10 +141,41 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/multi-admin"
+            element={
+              <ProtectedRoute requireSystem={true}>
+                <Layout>
+                  <MultiAdminDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tenant-management"
+            element={
+              <ProtectedRoute requireSystem={true}>
+                <Layout>
+                  <TenantManagement />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/system-settings"
+            element={
+              <ProtectedRoute requireSystem={true}>
+                <Layout>
+                  <SystemSettings />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<RootRedirect />} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />
       </Router>
+      </TenantBranding>
     </AuthProvider>
   );
 }

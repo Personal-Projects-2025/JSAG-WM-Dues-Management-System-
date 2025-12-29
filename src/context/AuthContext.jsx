@@ -13,6 +13,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [tenant, setTenant] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +21,39 @@ export const AuthProvider = ({ children }) => {
       if (authService.isAuthenticated()) {
         try {
           const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
+          
+          // If user doesn't have tenantId but is not a system user, try to refresh token
+          if (!currentUser.tenantId && currentUser.role !== 'system') {
+            try {
+              const refreshed = await authService.refreshToken();
+              setUser(refreshed.user);
+              if (refreshed.tenant) {
+                setTenant(refreshed.tenant);
+              }
+            } catch (refreshError) {
+              // If refresh fails, continue with current user
+              console.warn('Token refresh failed:', refreshError);
+              setUser(currentUser);
+            }
+          } else {
+            setUser(currentUser);
+            if (currentUser.tenant) {
+              setTenant(currentUser.tenant);
+              localStorage.setItem('tenant', JSON.stringify(currentUser.tenant));
+            } else if (currentUser.isSystemUser) {
+              setTenant(null);
+            } else {
+              const storedTenant = authService.getTenant();
+              setTenant(storedTenant);
+            }
+          }
         } catch (error) {
-          authService.logout();
+          console.error('Auth initialization error:', error);
+          // Don't logout on error - might be temporary
+          const storedUser = authService.getUser();
+          if (storedUser) {
+            setUser(storedUser);
+          }
         }
       }
       setLoading(false);
@@ -33,16 +64,24 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     const data = await authService.login(username, password);
     setUser(data.user);
+    if (data.tenant) {
+      setTenant(data.tenant);
+    } else if (data.isSystemUser) {
+      // System users don't have tenants
+      setTenant(null);
+    }
     return data;
   };
 
   const logout = () => {
     authService.logout();
     setUser(null);
+    setTenant(null);
   };
 
   const value = {
     user,
+    tenant,
     login,
     logout,
     loading,

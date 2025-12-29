@@ -1,27 +1,53 @@
 import React, { useState } from 'react';
 import api from '../services/api.js';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Settings = () => {
+  const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
+    email: '',
     password: '',
     role: 'admin'
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate user is a super user
+    if (user?.role !== 'super') {
+      toast.error('Only super users can create other users');
+      return;
+    }
+    
+    // Validate tenantId exists
+    if (!user?.tenantId) {
+      toast.error('Unable to determine your tenant. Please log out and log back in.');
+      return;
+    }
+    
     try {
-      await api.post('/auth/register', formData);
+      // Automatically assign tenantId from the current super user's tenant
+      const payload = {
+        ...formData,
+        tenantId: user.tenantId // Super users should always have tenantId
+      };
+      
+      console.log('Creating user with payload:', { ...payload, password: '***' });
+      
+      await api.post('/auth/register', payload);
       toast.success('User created successfully');
       setShowModal(false);
       setFormData({
         username: '',
+        email: '',
         password: '',
         role: 'admin'
       });
     } catch (error) {
+      console.error('User creation error:', error.response?.data);
       toast.error(error.response?.data?.error || 'Failed to create user');
     }
   };
@@ -60,6 +86,18 @@ const Settings = () => {
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Email *</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="user@example.com"
+                />
+                <p className="mt-1 text-xs text-gray-500">Email is required to send login credentials</p>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Password *</label>

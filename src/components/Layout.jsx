@@ -11,14 +11,17 @@ import {
   BarChart2,
   Bell,
   ClipboardList,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Building2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTenantBranding } from './TenantBranding.jsx';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
 
 const Layout = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, tenant, logout } = useAuth();
+  const { tenantName, primaryColor } = useTenantBranding();
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -29,6 +32,16 @@ const Layout = ({ children }) => {
   };
 
   const navItems = useMemo(() => {
+    // System Users get Multi-Admin Dashboard navigation
+    if (user?.role === 'system') {
+      return [
+        { path: '/multi-admin', label: 'Multi-Admin Dashboard', icon: LayoutDashboard },
+        { path: '/tenant-management', label: 'Tenant Management', icon: Building2 },
+        { path: '/system-settings', label: 'System Settings', icon: SettingsIcon }
+      ];
+    }
+
+    // Tenant-bound users (admin/super) get regular navigation
     const baseItems = [
       { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/members', label: 'Members', icon: Users },
@@ -38,9 +51,9 @@ const Layout = ({ children }) => {
       { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
       { path: '/reports', label: 'Reports', icon: BarChart2 },
       { path: '/activity-logs', label: 'Activity Logs', icon: ClipboardList }
-  ];
+    ];
 
-  if (user?.role === 'super') {
+    if (user?.role === 'super') {
       baseItems.splice(4, 0, {
         path: '/subgroups',
         label: 'Subgroups',
@@ -53,7 +66,7 @@ const Layout = ({ children }) => {
         icon: SettingsIcon,
         roles: ['super']
       });
-  }
+    }
 
     return baseItems.filter((item) => {
       if (!item.roles) return true;

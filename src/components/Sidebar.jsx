@@ -37,7 +37,7 @@ const Sidebar = ({
               GD
             </div>
             {!isCollapsed && (
-              <span className="text-sm font-semibold tracking-tight text-slate-900">Group Dues</span>
+              <span className="text-sm font-semibold tracking-tight text-slate-900">Dues Accountant</span>
             )}
           </div>
           <button
