@@ -1,7 +1,9 @@
 import React from 'react';
 import { Menu } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const TopBar = ({ onMobileToggle, user, onLogout }) => {
+  const { tenant } = useAuth();
   const initials = user?.username
     ? user.username
         .split(' ')
@@ -26,6 +28,16 @@ const TopBar = ({ onMobileToggle, user, onLogout }) => {
         </div>
 
         <div className="flex items-center space-x-4">
+          {tenant && (
+            <div className="hidden md:block text-right border-r border-slate-200 pr-4">
+              <p className="text-sm font-medium text-slate-700">
+                {tenant.name}
+              </p>
+              <p className="text-xs text-slate-500">
+                Organization
+              </p>
+            </div>
+          )}
           <div className="hidden sm:block text-right">
             <p className="text-sm font-medium text-slate-700">
               {user?.username || 'User'}

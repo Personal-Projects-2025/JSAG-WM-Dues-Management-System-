@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const ProtectedRoute = ({ children, requireSuper = false }) => {
+const ProtectedRoute = ({ children, requireSuper = false, requireSystem = false }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
@@ -17,7 +17,11 @@ const ProtectedRoute = ({ children, requireSuper = false }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requireSuper && user?.role !== 'super') {
+  if (requireSystem && user?.role !== 'system') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requireSuper && user?.role !== 'super' && user?.role !== 'system') {
     return <Navigate to="/dashboard" replace />;
   }
 
