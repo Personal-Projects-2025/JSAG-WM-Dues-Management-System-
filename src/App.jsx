@@ -1,33 +1,49 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Layout from './components/Layout.jsx';
-import Login from './pages/Login.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import Members from './pages/Members.jsx';
-import Payments from './pages/Payments.jsx';
-import Expenditure from './pages/Expenditure.jsx';
-import Reports from './pages/Reports.jsx';
-import ActivityLogs from './pages/ActivityLogs.jsx';
-import Settings from './pages/Settings.jsx';
-import Subgroups from './pages/Subgroups.jsx';
-import SubgroupLeaderboard from './pages/SubgroupLeaderboard.jsx';
-import Reminders from './pages/Reminders.jsx';
-import TenantRegistration from './pages/TenantRegistration.jsx';
-import TenantManagement from './pages/TenantManagement.jsx';
-import MultiAdminDashboard from './pages/MultiAdminDashboard.jsx';
-import SystemSettings from './pages/SystemSettings.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import TenantBranding from './components/TenantBranding.jsx';
 import RootRedirect from './components/RootRedirect.jsx';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load pages for code splitting
+const Login = lazy(() => import('./pages/Login.jsx'));
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const Members = lazy(() => import('./pages/Members.jsx'));
+const Payments = lazy(() => import('./pages/Payments.jsx'));
+const Expenditure = lazy(() => import('./pages/Expenditure.jsx'));
+const Reports = lazy(() => import('./pages/Reports.jsx'));
+const ActivityLogs = lazy(() => import('./pages/ActivityLogs.jsx'));
+const Settings = lazy(() => import('./pages/Settings.jsx'));
+const Subgroups = lazy(() => import('./pages/Subgroups.jsx'));
+const SubgroupLeaderboard = lazy(() => import('./pages/SubgroupLeaderboard.jsx'));
+const Reminders = lazy(() => import('./pages/Reminders.jsx'));
+const TenantRegistration = lazy(() => import('./pages/TenantRegistration.jsx'));
+const TenantManagement = lazy(() => import('./pages/TenantManagement.jsx'));
+const MultiAdminDashboard = lazy(() => import('./pages/MultiAdminDashboard.jsx'));
+const SystemSettings = lazy(() => import('./pages/SystemSettings.jsx'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <div className="flex flex-col items-center gap-3">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-600" aria-label="Loading" />
+      <p className="text-sm text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
-    <AuthProvider>
-      <TenantBranding>
-        <Router>
+    <ErrorBoundary>
+      <AuthProvider>
+        <TenantBranding>
+          <Router>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/register" element={<TenantRegistration />} />
             <Route path="/login" element={<Login />} />
@@ -112,16 +128,6 @@ function App() {
             }
           />
           <Route
-            path="/reminders"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Reminders />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/activity-logs"
             element={
               <ProtectedRoute>
@@ -173,10 +179,12 @@ function App() {
           />
           <Route path="/" element={<RootRedirect />} />
         </Routes>
+        </Suspense>
         <ToastContainer position="top-right" autoClose={3000} />
       </Router>
       </TenantBranding>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

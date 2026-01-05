@@ -1,4 +1,5 @@
 import axios from 'axios';
+import apiCache from '../utils/apiCache.js';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -35,6 +36,54 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Cached GET request helper
+ * @param {string} url - API endpoint URL
+ * @param {object} config - Axios config object
+ * @param {number} ttl - Cache TTL in milliseconds (default: 5 minutes)
+ * @param {boolean} useCache - Whether to use cache (default: true)
+ * @returns {Promise} Axios response
+ */
+api.getCached = async (url, config = {}, ttl = null, useCache = true) => {
+  const params = config.params || {};
+  
+  // Check cache first
+  if (useCache) {
+    const cached = apiCache.get(url, params);
+    if (cached !== null) {
+      return { data: cached, fromCache: true };
+    }
+  }
+
+  // Fetch from API
+  try {
+    const response = await api.get(url, config);
+    
+    // Cache successful responses
+    if (useCache && response.status === 200) {
+      apiCache.set(url, params, response.data, ttl);
+    }
+    
+    return { ...response, fromCache: false };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Clear cache for a specific endpoint
+ */
+api.clearCache = (url, params = {}) => {
+  apiCache.clear(url, params);
+};
+
+/**
+ * Clear all cache or cache matching a pattern
+ */
+api.clearCachePattern = (pattern) => {
+  apiCache.clearPattern(pattern);
+};
 
 export default api;
 

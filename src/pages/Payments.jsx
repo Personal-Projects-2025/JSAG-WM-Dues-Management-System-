@@ -89,7 +89,7 @@ const Payments = () => {
       const response = await api.get('/receipts');
       setReceipts(response.data);
     } catch (error) {
-      console.error('Failed to load receipts:', error);
+      // Silently fail - receipts are optional
     }
   }, []);
 

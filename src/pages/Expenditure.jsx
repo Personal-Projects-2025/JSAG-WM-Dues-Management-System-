@@ -14,6 +14,7 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
+import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const formatCurrency = (value) =>
   typeof value === 'number'
@@ -47,6 +48,8 @@ const Expenditure = () => {
   const [submitting, setSubmitting] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [expenditureToDelete, setExpenditureToDelete] = useState(null);
 
   useEffect(() => {
     fetchExpenditures();
@@ -130,14 +133,20 @@ const Expenditure = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this expenditure?')) {
-      try {
-        await api.delete(`/expenditure/${id}`);
-        toast.success('Expenditure deleted successfully');
-        fetchExpenditures();
-      } catch (error) {
-        toast.error('Failed to delete expenditure');
-      }
+    setExpenditureToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!expenditureToDelete) return;
+    try {
+      await api.delete(`/expenditure/${expenditureToDelete}`);
+      toast.success('Expenditure deleted successfully');
+      fetchExpenditures();
+      setDeleteConfirmOpen(false);
+      setExpenditureToDelete(null);
+    } catch (error) {
+      toast.error('Failed to delete expenditure');
     }
   };
 
