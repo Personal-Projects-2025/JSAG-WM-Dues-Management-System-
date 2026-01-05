@@ -23,6 +23,8 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
+import { TableSkeleton } from '../components/LoadingSkeleton.jsx';
+import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const formatCurrency = (value) =>
   typeof value === 'number'
@@ -366,6 +368,8 @@ const Members = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [editingMember, setEditingMember] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     memberId: '',
@@ -437,7 +441,11 @@ const Members = () => {
       resetForm();
       fetchMembers();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      const errorMessage = error.response?.data?.error || error.response?.data?.details?.[0]?.msg || 'Operation failed';
+      toast.error(errorMessage);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Member operation error:', error.response?.data);
+      }
     }
   };
 
@@ -455,17 +463,23 @@ const Members = () => {
     setFormOpen(true);
   }, []);
 
-  const handleDelete = useCallback(async (id) => {
-    if (window.confirm('Are you sure you want to delete this member?')) {
-      try {
-        await api.delete(`/members/${id}`);
-        toast.success('Member deleted successfully');
-        fetchMembers();
-      } catch (error) {
-        toast.error('Failed to delete member');
-      }
+  const handleDeleteClick = useCallback((id) => {
+    setMemberToDelete(id);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!memberToDelete) return;
+    try {
+      await api.delete(`/members/${memberToDelete}`);
+      toast.success('Member deleted successfully');
+      fetchMembers();
+      setDeleteConfirmOpen(false);
+      setMemberToDelete(null);
+    } catch (error) {
+      toast.error('Failed to delete member');
     }
-  }, [fetchMembers]);
+  }, [memberToDelete, fetchMembers]);
 
   const openDetail = useCallback((member) => {
     setSelectedMember(member);
@@ -585,7 +599,7 @@ const Members = () => {
               </button>
               <button
                 type="button"
-                onClick={() => handleDelete(member._id)}
+                onClick={() => handleDeleteClick(member._id)}
                 className="inline-flex items-center rounded-md border border-red-200 px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 transition"
               >
                 <Trash2 size={14} className="mr-1" />
@@ -596,7 +610,7 @@ const Members = () => {
         }
       }
     ],
-    [openDetail, handleEdit, handleDelete]
+    [openDetail, handleEdit, handleDeleteClick]
   );
 
   const table = useReactTable({
@@ -691,11 +705,15 @@ const Members = () => {
           </thead>
           <tbody className="divide-y divide-slate-200">
             {loading ? (
-              <tr>
-                <td colSpan={columns.length} className="p-6 text-center text-sm text-slate-500">
-                  Loading members…
-                </td>
-              </tr>
+              Array.from({ length: pageSize }).map((_, idx) => (
+                <tr key={idx}>
+                  {columns.map((_, colIdx) => (
+                    <td key={colIdx} className="px-4 py-3">
+                      <div className="h-5 w-full bg-gray-200 animate-pulse rounded" />
+                    </td>
+                  ))}
+                </tr>
+              ))
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition">
@@ -757,6 +775,20 @@ const Members = () => {
         isOpen={detailOpen}
         onClose={() => setDetailOpen(false)}
         member={selectedMember}
+      />
+
+      <ConfirmationModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setMemberToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Member"
+        message="Are you sure you want to delete this member? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
       />
     </div>
   );

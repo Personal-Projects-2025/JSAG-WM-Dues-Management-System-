@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const formatCurrency = (value) =>
   typeof value === 'number'
@@ -42,6 +43,8 @@ const Subgroups = () => {
   const [formState, setFormState] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [subgroupToDelete, setSubgroupToDelete] = useState(null);
 
   useEffect(() => {
     if (user?.role !== 'super') {
@@ -161,13 +164,18 @@ const Subgroups = () => {
   };
 
   const handleDelete = async (subgroup) => {
-    if (!window.confirm(`Delete subgroup "${subgroup.name}"? Members will be set to Unassigned.`)) {
-      return;
-    }
+    setDeleteConfirmOpen(true);
+    setSubgroupToDelete(subgroup);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!subgroupToDelete) return;
     try {
-      await api.delete(`/subgroups/${subgroup._id}`);
+      await api.delete(`/subgroups/${subgroupToDelete._id}`);
       toast.success('Subgroup deleted successfully');
       fetchSubgroups();
+      setDeleteConfirmOpen(false);
+      setSubgroupToDelete(null);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to delete subgroup');
     }
@@ -322,6 +330,20 @@ const Subgroups = () => {
       />
 
       <SubgroupDetailModal isOpen={detailOpen} onClose={closeDetails} detail={detailData} />
+
+      <ConfirmationModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setSubgroupToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Subgroup"
+        message={subgroupToDelete ? `Delete subgroup "${subgroupToDelete.name}"? Members will be set to Unassigned.` : 'Are you sure you want to delete this subgroup?'}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

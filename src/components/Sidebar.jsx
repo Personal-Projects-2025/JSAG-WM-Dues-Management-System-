@@ -30,6 +30,7 @@ const Sidebar = ({
           'lg:translate-x-0'
         )}
         style={!isCollapsed ? { width: expandedWidth } : undefined}
+        aria-label="Main navigation"
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-3">
           <div className="flex items-center gap-2">
@@ -44,8 +45,9 @@ const Sidebar = ({
             type="button"
             className="inline-flex rounded-md p-2 text-slate-500 transition hover:bg-slate-100 lg:hidden"
             onClick={onMobileClose}
+            aria-label="Close sidebar"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -67,8 +69,9 @@ const Sidebar = ({
                     )
                   }
                   title={isCollapsed ? item.label : undefined}
+                  aria-label={item.label}
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition group-hover:bg-blue-500 group-hover:text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition group-hover:bg-blue-500 group-hover:text-white" aria-hidden="true">
                     <Icon size={18} />
                   </span>
                   {!isCollapsed && <span className="truncate">{item.label}</span>}
@@ -87,9 +90,11 @@ const Sidebar = ({
           <button
             type="button"
             onClick={onCollapseToggle}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!isCollapsed}
           >
-            {isCollapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
+            {isCollapsed ? <ChevronsRight size={18} aria-hidden="true" /> : <ChevronsLeft size={18} aria-hidden="true" />}
             <span className="sr-only">Toggle sidebar width</span>
           </button>
         </div>

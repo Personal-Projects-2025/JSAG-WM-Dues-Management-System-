@@ -32,7 +32,9 @@ export const AuthProvider = ({ children }) => {
               }
             } catch (refreshError) {
               // If refresh fails, continue with current user
-              console.warn('Token refresh failed:', refreshError);
+              if (process.env.NODE_ENV === 'development') {
+                console.warn('Token refresh failed:', refreshError);
+              }
               setUser(currentUser);
             }
           } else {
@@ -48,7 +50,9 @@ export const AuthProvider = ({ children }) => {
             }
           }
         } catch (error) {
-          console.error('Auth initialization error:', error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Auth initialization error:', error);
+          }
           // Don't logout on error - might be temporary
           const storedUser = authService.getUser();
           if (storedUser) {

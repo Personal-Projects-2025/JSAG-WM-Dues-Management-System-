@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { toast } from 'react-toastify';
+import { StatsCardSkeleton } from '../components/LoadingSkeleton.jsx';
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -62,7 +63,32 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="flex min-h-[60vh] items-center justify-center text-slate-500">Loading dashboard…</div>;
+    return (
+      <div className="space-y-6">
+        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="h-8 w-64 bg-gray-200 animate-pulse rounded mb-2" />
+            <div className="h-4 w-96 bg-gray-200 animate-pulse rounded" />
+          </div>
+          <div className="h-10 w-48 bg-gray-200 animate-pulse rounded" />
+        </header>
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <StatsCardSkeleton key={idx} />
+          ))}
+        </section>
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="h-6 w-48 bg-gray-200 animate-pulse rounded mb-4" />
+            <div className="h-64 w-full bg-gray-200 animate-pulse rounded" />
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="h-6 w-48 bg-gray-200 animate-pulse rounded mb-4" />
+            <div className="h-64 w-full bg-gray-200 animate-pulse rounded" />
+          </div>
+        </section>
+      </div>
+    );
   }
 
   if (!stats) {

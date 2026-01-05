@@ -35,8 +35,6 @@ const Settings = () => {
         tenantId: user.tenantId // Super users should always have tenantId
       };
       
-      console.log('Creating user with payload:', { ...payload, password: '***' });
-      
       await api.post('/auth/register', payload);
       toast.success('User created successfully');
       setShowModal(false);
@@ -47,7 +45,6 @@ const Settings = () => {
         role: 'admin'
       });
     } catch (error) {
-      console.error('User creation error:', error.response?.data);
       toast.error(error.response?.data?.error || 'Failed to create user');
     }
   };

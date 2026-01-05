@@ -38,7 +38,6 @@ const SystemSettings = () => {
       setTenants(tenantsRes.data.filter(t => t.status === 'active'));
     } catch (error) {
       toast.error('Failed to fetch data');
-      console.error(error);
     } finally {
       setLoading(false);
     }

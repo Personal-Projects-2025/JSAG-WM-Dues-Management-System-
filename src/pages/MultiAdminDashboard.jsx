@@ -51,7 +51,6 @@ const MultiAdminDashboard = () => {
       });
     } catch (error) {
       toast.error('Failed to fetch tenants');
-      console.error(error);
     } finally {
       setLoading(false);
     }
