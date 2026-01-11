@@ -11,6 +11,7 @@ import RootRedirect from './components/RootRedirect.jsx';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load pages for code splitting
+const Home = lazy(() => import('./pages/Home.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
 const Members = lazy(() => import('./pages/Members.jsx'));
@@ -26,6 +27,7 @@ const TenantRegistration = lazy(() => import('./pages/TenantRegistration.jsx'));
 const TenantManagement = lazy(() => import('./pages/TenantManagement.jsx'));
 const MultiAdminDashboard = lazy(() => import('./pages/MultiAdminDashboard.jsx'));
 const SystemSettings = lazy(() => import('./pages/SystemSettings.jsx'));
+const TenantApproval = lazy(() => import('./pages/TenantApproval.jsx'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -45,6 +47,7 @@ function App() {
           <Router>
           <Suspense fallback={<PageLoader />}>
           <Routes>
+            <Route path="/" element={<Home />} />
             <Route path="/register" element={<TenantRegistration />} />
             <Route path="/login" element={<Login />} />
           <Route
@@ -177,7 +180,17 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<RootRedirect />} />
+          <Route
+            path="/tenant-approval"
+            element={
+              <ProtectedRoute requireSystem={true}>
+                <Layout>
+                  <TenantApproval />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/app" element={<RootRedirect />} />
         </Routes>
         </Suspense>
         <ToastContainer position="top-right" autoClose={3000} />

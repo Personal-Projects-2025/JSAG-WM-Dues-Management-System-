@@ -16,7 +16,7 @@ const RootRedirect = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // System Users go to Multi-Admin Dashboard

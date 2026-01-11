@@ -97,8 +97,8 @@ const TenantRegistration = () => {
 
     try {
       const response = await api.post('/tenant-setup/register', formData);
-      toast.success('Tenant registered successfully!');
-      toast.info('You can now log in with your admin credentials');
+      toast.success('Organization registration submitted successfully!');
+      toast.info('Your organization is pending approval. You will receive an email notification once approved.');
       navigate('/login');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Registration failed');
@@ -323,9 +323,12 @@ const TenantRegistration = () => {
           )}
         </form>
 
-        <div className="text-center mt-4">
-          <Link to="/login" className="text-sm text-blue-600 hover:text-blue-500">
+        <div className="text-center mt-4 space-y-2">
+          <Link to="/login" className="block text-sm text-blue-600 hover:text-blue-500">
             Already have an account? Sign in
+          </Link>
+          <Link to="/" className="block text-sm text-gray-600 hover:text-gray-800">
+            ← Back to Home
           </Link>
         </div>
       </div>
