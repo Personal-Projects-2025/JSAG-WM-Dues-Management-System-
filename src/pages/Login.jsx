@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
@@ -7,8 +7,19 @@ const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      // Redirect authenticated users to their dashboard
+      if (user?.role === 'system') {
+        navigate('/multi-admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, authLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,13 +42,23 @@ const Login = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div>
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Dues Accountant
-              </h2>
+          <Link to="/" className="block text-center mb-4">
+            <h2 className="text-3xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors">
+              Dues Accountant
+            </h2>
+          </Link>
           <p className="mt-2 text-center text-sm text-gray-600">
             Sign in to your account
           </p>
@@ -85,9 +106,12 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-          <div className="text-center">
-            <Link to="/register" className="text-sm text-blue-600 hover:text-blue-500">
+          <div className="text-center space-y-2">
+            <Link to="/register" className="block text-sm text-blue-600 hover:text-blue-500">
               Don't have an account? Register your organization
+            </Link>
+            <Link to="/" className="block text-sm text-gray-600 hover:text-gray-800">
+              ← Back to Home
             </Link>
           </div>
         </form>
