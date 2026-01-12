@@ -16,7 +16,6 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useTenantBranding } from './TenantBranding.jsx';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
 
