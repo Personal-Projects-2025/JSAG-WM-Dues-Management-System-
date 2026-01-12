@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Users, UserPlus, Shield, Building2 } from 'lucide-react';
+import { Users, UserPlus, Shield } from 'lucide-react';
 
 const SystemSettings = () => {
   const { user } = useAuth();

@@ -22,7 +22,6 @@ import TopBar from './TopBar.jsx';
 
 const Layout = ({ children }) => {
   const { user, tenant, logout } = useAuth();
-  const { tenantName, primaryColor } = useTenantBranding();
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);

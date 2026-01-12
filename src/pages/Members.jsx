@@ -23,7 +23,6 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
-import { TableSkeleton } from '../components/LoadingSkeleton.jsx';
 import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const formatCurrency = (value) =>

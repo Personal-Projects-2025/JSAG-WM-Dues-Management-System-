@@ -96,7 +96,7 @@ const TenantRegistration = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/tenant-setup/register', formData);
+      await api.post('/tenant-setup/register', formData);
       toast.success('Organization registration submitted successfully!');
       toast.info('Your organization is pending approval. You will receive an email notification once approved.');
       navigate('/login');

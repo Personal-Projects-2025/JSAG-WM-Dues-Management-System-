@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const formatDateTime = (value) =>
   value
@@ -41,8 +40,6 @@ const ActivityLogs = () => {
   const [draftFilters, setDraftFilters] = useState(apiFilters);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [logToDelete, setLogToDelete] = useState(null);
 
   const fetchLogs = useCallback(async () => {
     try {
@@ -120,23 +117,15 @@ const ActivityLogs = () => {
     }
   };
 
-  const handleDelete = useCallback((id) => {
-    setLogToDelete(id);
-    setDeleteConfirmOpen(true);
-  }, []);
-
-  const handleDeleteConfirm = useCallback(async () => {
-    if (!logToDelete) return;
+  const handleDelete = useCallback(async (id) => {
     try {
-      await api.delete(`/logs/${logToDelete}`);
+      await api.delete(`/logs/${id}`);
       toast.success('Log deleted successfully');
       fetchLogs();
-      setDeleteConfirmOpen(false);
-      setLogToDelete(null);
     } catch (error) {
       toast.error('Failed to delete log');
     }
-  }, [logToDelete, fetchLogs]);
+  }, [fetchLogs]);
 
   const uniqueActors = new Set(logs.map((log) => log.actor)).size;
   const latestLog = logs
