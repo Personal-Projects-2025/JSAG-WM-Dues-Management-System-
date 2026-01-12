@@ -4,7 +4,6 @@ import { Menu, X } from 'lucide-react';
 
 const MarketingNav = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);

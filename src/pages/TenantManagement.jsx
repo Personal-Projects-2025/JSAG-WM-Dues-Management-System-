@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const TenantManagement = () => {
   const { user } = useAuth();
@@ -15,8 +14,6 @@ const TenantManagement = () => {
     slug: '',
     status: 'active'
   });
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [tenantToDelete, setTenantToDelete] = useState(null);
 
   useEffect(() => {
     if (user?.role === 'system') {
@@ -46,18 +43,10 @@ const TenantManagement = () => {
   };
 
   const handleDelete = async (tenantId) => {
-    setTenantToDelete(tenantId);
-    setDeleteConfirmOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!tenantToDelete) return;
     try {
-      await api.delete(`/tenants/${tenantToDelete}`);
+      await api.delete(`/tenants/${tenantId}`);
       toast.success('Tenant deleted');
       fetchTenants();
-      setDeleteConfirmOpen(false);
-      setTenantToDelete(null);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to delete tenant');
     }

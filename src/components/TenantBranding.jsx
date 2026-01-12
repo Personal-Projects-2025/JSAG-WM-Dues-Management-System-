@@ -15,7 +15,6 @@ const TenantBranding = ({ children }) => {
   // Get branding colors from tenant config
   const primaryColor = tenant.config?.branding?.primaryColor || '#3B82F6';
   const secondaryColor = tenant.config?.branding?.secondaryColor || '#1E40AF';
-  const tenantName = tenant.config?.branding?.name || tenant.name;
 
   // Create CSS variables for tenant branding
   const brandingStyles = {

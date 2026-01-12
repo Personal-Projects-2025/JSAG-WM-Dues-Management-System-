@@ -11,8 +11,6 @@ import {
   TrendingUp,
   ArrowRight,
   CreditCard,
-  PieChart,
-  LineChart as LineChartIcon
 } from 'lucide-react';
 import MarketingNav from '../components/MarketingNav';
 import MarketingFooter from '../components/MarketingFooter';
