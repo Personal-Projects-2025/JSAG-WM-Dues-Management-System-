@@ -69,12 +69,12 @@ const Subgroups = () => {
 
   const fetchLeaders = async () => {
     try {
-      const [adminsResponse, superResponse] = await Promise.all([
-        api.get('/members?role=admin'),
-        api.get('/members?role=super').catch(() => ({ data: [] }))
-      ]);
-
-      const leaders = [...(adminsResponse.data || []), ...(superResponse.data || [])]
+      // Fetch all members as potential subgroup leaders.
+      // Backend only requires that the leader is an existing member,
+      // so we don't restrict by member role here.
+      const response = await api.get('/members');
+      
+      const leaders = (response.data || [])
         .filter(Boolean)
         .filter((leader, index, self) =>
           leader && leader._id && self.findIndex((l) => l?._id === leader._id) === index
@@ -509,7 +509,7 @@ const SubgroupFormModal = ({
                   </div>
                   {leaders.length === 0 && (
                     <p className="text-xs text-amber-600">
-                      No admins or super users available. Promote a member to admin to use as a leader.
+                      No members available to assign as leaders. Please add members first.
                     </p>
                   )}
                 </div>
