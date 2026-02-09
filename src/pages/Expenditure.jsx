@@ -28,11 +28,13 @@ const defaultFormState = () => ({
   amount: '',
   description: '',
   category: '',
+  fundedByContributionTypeId: '',
   date: new Date().toISOString().split('T')[0]
 });
 
 const Expenditure = () => {
   const [expenditures, setExpenditures] = useState([]);
+  const [contributionTypes, setContributionTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     startDate: '',
@@ -50,6 +52,10 @@ const Expenditure = () => {
 
   useEffect(() => {
     fetchExpenditures();
+  }, []);
+
+  useEffect(() => {
+    api.get('/contribution-types').then((r) => setContributionTypes(r.data)).catch(() => {});
   }, []);
 
   const fetchExpenditures = async () => {
@@ -100,11 +106,15 @@ const Expenditure = () => {
     e.preventDefault();
     try {
       setSubmitting(true);
+      const payload = {
+        ...formState,
+        fundedByContributionTypeId: formState.fundedByContributionTypeId || undefined
+      };
       if (editingExpenditure) {
-        await api.put(`/expenditure/${editingExpenditure._id}`, formState);
+        await api.put(`/expenditure/${editingExpenditure._id}`, payload);
         toast.success('Expenditure updated successfully');
       } else {
-        await api.post('/expenditure', formState);
+        await api.post('/expenditure', payload);
         toast.success('Expenditure added successfully');
       }
       setFormOpen(false);
@@ -124,6 +134,7 @@ const Expenditure = () => {
       amount: expenditure.amount,
       description: expenditure.description || '',
       category: expenditure.category || '',
+      fundedByContributionTypeId: expenditure.fundedByContributionTypeId?._id || expenditure.fundedByContributionTypeId || '',
       date: expenditure.date ? new Date(expenditure.date).toISOString().split('T')[0] : ''
     });
     setFormOpen(true);
@@ -177,7 +188,7 @@ const Expenditure = () => {
 
       <SummaryCards totalSpent={totalSpent} count={filteredExpenditures.length} />
 
-      <ExpenditureTable
+        <ExpenditureTable
         data={paginatedExpenditures}
         totalCount={filteredExpenditures.length}
         pageIndex={pageIndex}
@@ -204,6 +215,7 @@ const Expenditure = () => {
         formState={formState}
         setFormState={setFormState}
         editing={Boolean(editingExpenditure)}
+        contributionTypes={contributionTypes}
       />
 
       <FilterDialog
@@ -285,7 +297,7 @@ const ExpenditureTable = ({
       <table className="min-w-full divide-y divide-slate-200">
         <thead className="bg-slate-50">
           <tr>
-            {['Title', 'Amount', 'Date', 'Category', 'Description', 'Actions'].map((header) => (
+            {['Title', 'Amount', 'Date', 'Category', 'Funded by', 'Description', 'Actions'].map((header) => (
               <th
                 key={header}
                 className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
@@ -298,7 +310,7 @@ const ExpenditureTable = ({
         <tbody className="divide-y divide-slate-200 text-sm text-slate-600">
           {data.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
+              <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
                 No expenditures match the selected filters.
               </td>
             </tr>
@@ -322,6 +334,11 @@ const ExpenditureTable = ({
                     )}
                   >
                     {item.category || 'Uncategorized'}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-slate-600">
+                    {item.fundedByContributionTypeId?.name || '—'}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-slate-500">
@@ -400,7 +417,8 @@ const ExpenditureFormModal = ({
   formState,
   setFormState,
   submitting,
-  editing
+  editing,
+  contributionTypes = []
 }) => (
   <Transition appear show={isOpen} as={React.Fragment}>
     <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -490,6 +508,19 @@ const ExpenditureFormModal = ({
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                       placeholder="e.g. Facilities"
                     />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-sm font-medium text-slate-700">Funded by (contribution type)</label>
+                    <select
+                      value={formState.fundedByContributionTypeId || ''}
+                      onChange={(e) => setFormState({ ...formState, fundedByContributionTypeId: e.target.value })}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    >
+                      <option value="">Not specified</option>
+                      {contributionTypes.map((t) => (
+                        <option key={t._id} value={t._id}>{t.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="space-y-1">
