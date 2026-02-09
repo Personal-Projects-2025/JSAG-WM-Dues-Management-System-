@@ -23,6 +23,7 @@ const Settings = lazy(() => import('./pages/Settings.jsx'));
 const Subgroups = lazy(() => import('./pages/Subgroups.jsx'));
 const SubgroupLeaderboard = lazy(() => import('./pages/SubgroupLeaderboard.jsx'));
 const Reminders = lazy(() => import('./pages/Reminders.jsx'));
+const FinancialBreakdown = lazy(() => import('./pages/FinancialBreakdown.jsx'));
 const TenantRegistration = lazy(() => import('./pages/TenantRegistration.jsx'));
 const TenantManagement = lazy(() => import('./pages/TenantManagement.jsx'));
 const MultiAdminDashboard = lazy(() => import('./pages/MultiAdminDashboard.jsx'));
@@ -86,6 +87,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Expenditure />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/financial-breakdown"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <FinancialBreakdown />
                 </Layout>
               </ProtectedRoute>
             }
