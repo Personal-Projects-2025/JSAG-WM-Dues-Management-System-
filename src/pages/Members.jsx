@@ -19,6 +19,7 @@ import {
   Plus,
   Search,
   Trash2,
+  Upload,
   Users as UsersIcon,
   X
 } from 'lucide-react';
@@ -256,6 +257,217 @@ const MemberFormModal = ({
   </Transition>
 );
 
+/** Parse pasted text: one member per line, columns = Name, Email, Phone, Subgroup (comma or tab) */
+const parseBulkText = (text) => {
+  if (!text || !text.trim()) return [];
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const parts = line.split(/[\t,]+/).map((p) => p.trim());
+      return {
+        name: parts[0] || '',
+        email: parts[1] || '',
+        contact: parts[2] || '',
+        subgroup: parts[3] || ''
+      };
+    })
+    .filter((row) => row.name);
+};
+
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const base64 = result && typeof result === 'string' && result.startsWith('data:') ? result.split(',')[1] : result;
+      resolve(base64 || '');
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const BulkAddModal = ({
+  isOpen,
+  onClose,
+  bulkMode,
+  setBulkMode,
+  bulkText,
+  setBulkText,
+  bulkFile,
+  setBulkFile,
+  bulkDuesPerMonth,
+  setBulkDuesPerMonth,
+  onPasteSubmit,
+  onExcelSubmit,
+  submitting,
+  tenantInfo,
+  extractInitials,
+  onDownloadTemplate
+}) => {
+  const parsed = parseBulkText(bulkText);
+  const canSubmitPaste = parsed.length > 0 && bulkDuesPerMonth !== '' && Number(bulkDuesPerMonth) >= 0;
+  const canSubmitExcel = bulkFile && bulkDuesPerMonth !== '' && Number(bulkDuesPerMonth) >= 0;
+  const canSubmit = bulkMode === 'paste' ? canSubmitPaste : canSubmitExcel;
+  const submitLabel = bulkMode === 'paste' ? `Add ${parsed.length} member(s)` : (bulkFile ? `Add from ${bulkFile.name}` : 'Add from file');
+
+  return (
+    <Transition appear show={isOpen} as={React.Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={React.Fragment}
+          enter="ease-out duration-200"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-slate-900/40" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-6">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 translate-y-4 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                  <div>
+                    <Dialog.Title className="text-lg font-semibold text-slate-900">
+                      Bulk add members
+                    </Dialog.Title>
+                    <p className="text-sm text-slate-500">
+                      Paste a list or upload an Excel file. Columns: Name, Email, Phone, Subgroup.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                    onClick={onClose}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="border-b border-slate-200 px-6">
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setBulkMode('paste')}
+                      className={clsx(
+                        'px-4 py-2 text-sm font-medium rounded-t-lg transition',
+                        bulkMode === 'paste'
+                          ? 'bg-slate-100 text-slate-900 border border-b-0 border-slate-200'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      )}
+                    >
+                      Paste
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBulkMode('excel')}
+                      className={clsx(
+                        'px-4 py-2 text-sm font-medium rounded-t-lg transition',
+                        bulkMode === 'excel'
+                          ? 'bg-slate-100 text-slate-900 border border-b-0 border-slate-200'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      )}
+                    >
+                      Upload Excel
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4 px-6 py-6">
+                  {bulkMode === 'paste' && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Paste list (Name, Email, Phone, Subgroup)</label>
+                      <textarea
+                        value={bulkText}
+                        onChange={(e) => setBulkText(e.target.value)}
+                        placeholder={'John Doe, john@example.com, 0244123456, Group A\nJane Smith, jane@example.com, 0555123456, Group B\n...'}
+                        rows={8}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      />
+                      <p className="mt-1 text-xs text-slate-500">
+                        {parsed.length} valid row(s). Member IDs auto-generated as {tenantInfo?.name ? `${extractInitials(tenantInfo.name)}-XXXXX` : 'ORG-XXXXX'}.
+                      </p>
+                    </div>
+                  )}
+                  {bulkMode === 'excel' && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <a
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); onDownloadTemplate(); }}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                        >
+                          Download template (.xlsx)
+                        </a>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Select Excel file (.xlsx, max 2 MB, max 500 rows)</label>
+                        <input
+                          type="file"
+                          accept=".xlsx"
+                          onChange={(e) => setBulkFile(e.target.files?.[0] || null)}
+                          className="w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        {bulkFile && (
+                          <p className="mt-1 text-xs text-slate-500">
+                            {bulkFile.name} ({(bulkFile.size / 1024).toFixed(1)} KB)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div className="w-full max-w-xs">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Dues per month (GHS) for all *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={bulkDuesPerMonth}
+                      onChange={(e) => setBulkDuesPerMonth(e.target.value)}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-6 py-4 bg-slate-50">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!canSubmit || submitting}
+                    onClick={bulkMode === 'paste' ? onPasteSubmit : onExcelSubmit}
+                    className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? 'Adding…' : submitLabel}
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+};
+
 const MemberDetailPanel = ({ isOpen, onClose, member }) => {
   if (!member) return null;
 
@@ -425,6 +637,12 @@ const Members = () => {
     subgroupId: ''
   });
   const [tenantInfo, setTenantInfo] = useState(null);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkMode, setBulkMode] = useState('paste');
+  const [bulkText, setBulkText] = useState('');
+  const [bulkFile, setBulkFile] = useState(null);
+  const [bulkDuesPerMonth, setBulkDuesPerMonth] = useState('');
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
 
   const fetchMembers = useCallback(async (term) => {
     try {
@@ -539,6 +757,96 @@ const Members = () => {
   const handleDeleteClick = useCallback((id) => {
     setMemberToDelete(id);
     setDeleteConfirmOpen(true);
+  }, []);
+
+  const handleBulkPasteSubmit = useCallback(async () => {
+    const parsed = parseBulkText(bulkText);
+    const dues = parseFloat(bulkDuesPerMonth);
+    if (parsed.length === 0 || isNaN(dues) || dues < 0) {
+      toast.error('Add at least one member (name required) and a valid dues per month.');
+      return;
+    }
+    setBulkSubmitting(true);
+    try {
+      const res = await api.post('/members/bulk', {
+        members: parsed,
+        duesPerMonth: dues
+      });
+      const created = res.data?.created?.length ?? 0;
+      const errs = res.data?.errors;
+      if (created > 0) {
+        toast.success(res.data.message || `${created} member(s) added`);
+        setBulkModalOpen(false);
+        setBulkText('');
+        setBulkDuesPerMonth('');
+        fetchMembers();
+      }
+      if (errs && errs.length > 0) {
+        toast.warning(`${errs.length} row(s) failed: ${errs.map((e) => e.message).join('; ')}`);
+      }
+    } catch (error) {
+      const msg = error.response?.data?.error || 'Bulk add failed';
+      toast.error(msg);
+    } finally {
+      setBulkSubmitting(false);
+    }
+  }, [bulkText, bulkDuesPerMonth, fetchMembers]);
+
+  const handleBulkExcelSubmit = useCallback(async () => {
+    if (!bulkFile || bulkFile.size === 0) {
+      toast.error('Select an Excel file.');
+      return;
+    }
+    const dues = parseFloat(bulkDuesPerMonth);
+    if (isNaN(dues) || dues < 0) {
+      toast.error('Enter a valid dues per month.');
+      return;
+    }
+    setBulkSubmitting(true);
+    try {
+      const base64 = await fileToBase64(bulkFile);
+      const res = await api.post('/members/bulk', {
+        file: base64,
+        fileName: bulkFile.name,
+        duesPerMonth: dues
+      });
+      const created = res.data?.created?.length ?? 0;
+      const errs = res.data?.errors;
+      if (created > 0) {
+        toast.success(res.data.message || `${created} member(s) added`);
+        setBulkModalOpen(false);
+        setBulkFile(null);
+        setBulkDuesPerMonth('');
+        fetchMembers();
+      }
+      if (errs && errs.length > 0) {
+        toast.warning(`${errs.length} row(s) failed: ${errs.map((e) => e.message).join('; ')}`);
+      }
+    } catch (error) {
+      const msg = error.response?.data?.error || 'Bulk add failed';
+      toast.error(msg);
+    } finally {
+      setBulkSubmitting(false);
+    }
+  }, [bulkFile, bulkDuesPerMonth, fetchMembers]);
+
+  // Backward-compatible alias for any remaining references (e.g. dependency arrays)
+  const handleBulkSubmit = handleBulkPasteSubmit;
+
+  const handleDownloadBulkTemplate = useCallback(async () => {
+    try {
+      const res = await api.get('/members/bulk-template', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'members-bulk-template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      toast.error('Failed to download template');
+    }
   }, []);
 
   const handleDeleteConfirm = useCallback(async () => {
@@ -723,17 +1031,26 @@ const Members = () => {
             Manage the people in your group, their dues and subgroup assignments.
           </p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setEditingMember(null);
-            setFormOpen(true);
-          }}
-          className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-        >
-          <Plus size={16} className="mr-2" />
-          Add Member
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setBulkModalOpen(true)}
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            <Upload size={16} className="mr-2" />
+            Bulk add
+          </button>
+          <button
+            onClick={() => {
+              resetForm();
+              setEditingMember(null);
+              setFormOpen(true);
+            }}
+            className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          >
+            <Plus size={16} className="mr-2" />
+            Add Member
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -836,6 +1153,31 @@ const Members = () => {
           </div>
         </div>
       </div>
+
+      <BulkAddModal
+        isOpen={bulkModalOpen}
+        onClose={() => {
+          setBulkModalOpen(false);
+          setBulkMode('paste');
+          setBulkText('');
+          setBulkFile(null);
+          setBulkDuesPerMonth('');
+        }}
+        bulkMode={bulkMode}
+        setBulkMode={setBulkMode}
+        bulkText={bulkText}
+        setBulkText={setBulkText}
+        bulkFile={bulkFile}
+        setBulkFile={setBulkFile}
+        bulkDuesPerMonth={bulkDuesPerMonth}
+        setBulkDuesPerMonth={setBulkDuesPerMonth}
+        onPasteSubmit={handleBulkPasteSubmit}
+        onExcelSubmit={handleBulkExcelSubmit}
+        submitting={bulkSubmitting}
+        tenantInfo={tenantInfo}
+        extractInitials={extractInitials}
+        onDownloadTemplate={handleDownloadBulkTemplate}
+      />
 
       <MemberFormModal
         isOpen={formOpen}
