@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
+import React, { useEffect, useState, useCallback } from 'react';
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { BarChart2, PieChart, List, Filter, Loader2 } from 'lucide-react';
 import api from '../services/api.js';
 import clsx from 'clsx';
@@ -19,7 +19,7 @@ const FinancialBreakdown = () => {
   });
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const fetchBreakdown = async () => {
+  const fetchBreakdown = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -32,11 +32,11 @@ const FinancialBreakdown = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.startDate, filters.endDate]);
 
   useEffect(() => {
     fetchBreakdown();
-  }, [filters.startDate, filters.endDate]);
+  }, [fetchBreakdown]);
 
   const tabs = [
     { id: 'byType', label: 'By contribution type', icon: BarChart2 },

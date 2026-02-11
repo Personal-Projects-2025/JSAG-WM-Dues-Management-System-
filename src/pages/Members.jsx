@@ -405,13 +405,13 @@ const BulkAddModal = ({
                   {bulkMode === 'excel' && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <a
-                          href="#"
-                          onClick={(e) => { e.preventDefault(); onDownloadTemplate(); }}
+                        <button
+                          type="button"
+                          onClick={onDownloadTemplate}
                           className="text-sm font-medium text-blue-600 hover:text-blue-700"
                         >
                           Download template (.xlsx)
-                        </a>
+                        </button>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Select Excel file (.xlsx, max 2 MB, max 500 rows)</label>
@@ -829,9 +829,6 @@ const Members = () => {
       setBulkSubmitting(false);
     }
   }, [bulkFile, bulkDuesPerMonth, fetchMembers]);
-
-  // Backward-compatible alias for any remaining references (e.g. dependency arrays)
-  const handleBulkSubmit = handleBulkPasteSubmit;
 
   const handleDownloadBulkTemplate = useCallback(async () => {
     try {
