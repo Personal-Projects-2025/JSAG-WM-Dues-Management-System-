@@ -51,7 +51,7 @@ const MarketingNav = () => {
             </Link>
             <Link
               to="/register"
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="inline-flex min-h-[44px] items-center justify-center bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"
             >
               Get Started
             </Link>
@@ -61,7 +61,7 @@ const MarketingNav = () => {
           <div className="md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 hover:text-blue-600"
+              className="flex h-11 min-w-[44px] items-center justify-center text-gray-700 hover:text-blue-600"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -76,31 +76,31 @@ const MarketingNav = () => {
           <div className="px-4 pt-2 pb-3 space-y-1">
             <button
               onClick={() => scrollToSection('features')}
-              className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+              className="flex min-h-[44px] w-full items-center text-left px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-md"
             >
               Features
             </button>
             <button
               onClick={() => scrollToSection('analytics')}
-              className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+              className="flex min-h-[44px] w-full items-center text-left px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-md"
             >
               Analytics
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+              className="flex min-h-[44px] w-full items-center text-left px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-md"
             >
               FAQ
             </button>
             <Link
               to="/login"
-              className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+              className="flex min-h-[44px] items-center px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-md"
             >
               Login
             </Link>
             <Link
               to="/register"
-              className="block px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center"
+              className="flex min-h-[44px] items-center justify-center px-3 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Get Started
             </Link>

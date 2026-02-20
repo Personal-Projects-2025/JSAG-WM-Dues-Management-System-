@@ -109,9 +109,9 @@ const TenantRegistration = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8 bg-white rounded-lg shadow-lg p-8">
+      <div className="max-w-2xl w-full space-y-8 bg-white rounded-lg shadow-lg p-4 sm:p-8">
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
             Register Your Organization
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -182,7 +182,7 @@ const TenantRegistration = () => {
                 <button
                   type="button"
                   onClick={() => validateStep1() && setStep(2)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Next
                 </button>
@@ -228,18 +228,18 @@ const TenantRegistration = () => {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="min-h-[44px] px-4 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
                   Back
                 </button>
                 <button
                   type="button"
                   onClick={() => validateStep2() && setStep(3)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Next
                 </button>
@@ -303,18 +303,18 @@ const TenantRegistration = () => {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="min-h-[44px] px-4 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
                   {loading ? 'Registering...' : 'Register'}
                 </button>

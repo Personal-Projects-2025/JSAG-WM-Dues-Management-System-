@@ -60,7 +60,7 @@ const Reports = () => {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Reports</h1>
           <p className="text-sm text-slate-500">
             Lightweight exports for members and payments. Choose your format and filters.
           </p>
@@ -68,7 +68,7 @@ const Reports = () => {
         <button
           type="button"
           onClick={() => window.print()}
-          className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-100"
+          className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-100"
         >
           <Printer size={16} className="mr-2" />
           Print view

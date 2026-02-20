@@ -82,7 +82,7 @@ const MemberFormModal = ({
       </Transition.Child>
 
       <div className="fixed inset-0 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-6">
+        <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
           <Transition.Child
             as={React.Fragment}
             enter="ease-out duration-200"
@@ -93,7 +93,7 @@ const MemberFormModal = ({
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-6">
                 <div>
                   <Dialog.Title className="text-lg font-semibold text-slate-900">
                     {editingMember ? 'Edit Member' : 'Add New Member'}
@@ -106,14 +106,14 @@ const MemberFormModal = ({
                 </div>
                 <button
                   type="button"
-                  className="rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                  className="rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                   onClick={onClose}
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <form onSubmit={onSubmit} className="space-y-6 px-6 py-6">
+              <form onSubmit={onSubmit} className="space-y-6 px-4 py-4 sm:px-6 sm:py-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-slate-700">Full name *</label>
@@ -328,7 +328,7 @@ const BulkAddModal = ({
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-6">
+          <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
             <Transition.Child
               as={React.Fragment}
               enter="ease-out duration-200"
@@ -339,7 +339,7 @@ const BulkAddModal = ({
               leaveTo="opacity-0 translate-y-4 sm:scale-95"
             >
               <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-6">
                   <div>
                     <Dialog.Title className="text-lg font-semibold text-slate-900">
                       Bulk add members
@@ -350,14 +350,14 @@ const BulkAddModal = ({
                   </div>
                   <button
                     type="button"
-                    className="rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                    className="rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                     onClick={onClose}
                   >
                     <X size={18} />
                   </button>
                 </div>
 
-                <div className="border-b border-slate-200 px-6">
+                <div className="border-b border-slate-200 px-4 sm:px-6">
                   <div className="flex gap-1">
                     <button
                       type="button"
@@ -386,7 +386,7 @@ const BulkAddModal = ({
                   </div>
                 </div>
 
-                <div className="space-y-4 px-6 py-6">
+                <div className="space-y-4 px-4 py-4 sm:px-6 sm:py-6">
                   {bulkMode === 'paste' && (
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">Paste list (Name, Email, Phone, Subgroup)</label>
@@ -442,7 +442,7 @@ const BulkAddModal = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-6 py-4 bg-slate-50">
+                <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-4 py-4 sm:px-6 bg-slate-50">
                   <button
                     type="button"
                     onClick={onClose}
@@ -500,7 +500,7 @@ const MemberDetailPanel = ({ isOpen, onClose, member }) => {
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-                <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
+                <div className="flex items-start justify-between border-b border-slate-200 px-4 py-4 sm:px-6">
                   <div className="flex items-center space-x-3">
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-semibold text-blue-600">
                       {initialsFromName(member.name)}
@@ -517,13 +517,13 @@ const MemberDetailPanel = ({ isOpen, onClose, member }) => {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                    className="rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
-                <div className="space-y-6 px-6 py-6">
+                <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center space-x-2 text-slate-500">
@@ -1023,7 +1023,7 @@ const Members = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Members</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Members</h1>
           <p className="text-sm text-slate-500">
             Manage the people in your group, their dues and subgroup assignments.
           </p>
@@ -1078,7 +1078,8 @@ const Members = () => {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -1127,6 +1128,7 @@ const Members = () => {
             )}
           </tbody>
         </table>
+        </div>
 
         <div className="flex flex-col gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 md:flex-row md:items-center md:justify-between">
           <div>
@@ -1134,14 +1136,14 @@ const Members = () => {
           </div>
           <div className="inline-flex items-center gap-2">
             <button
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-slate-100 transition"
+              className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-slate-100 transition"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               Previous
             </button>
             <button
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-slate-100 transition"
+              className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-slate-100 transition"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >

@@ -121,14 +121,14 @@ const Dashboard = () => {
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-400">Welcome back</p>
-          <h1 className="text-3xl font-bold text-slate-900">Leadership overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Leadership overview</h1>
           <p className="text-sm text-slate-500">
             Minimal snapshot of dues health, subgroup performance, and reminders—all in one glance.
           </p>
         </div>
         <Link
           to="/payments"
-          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
         >
           <ArrowUpRight size={16} className="mr-2" />
           Record new payment
@@ -196,7 +196,7 @@ const Dashboard = () => {
             <h2 className="text-lg font-semibold text-slate-900">Subgroup performance snapshot</h2>
             <p className="text-xs text-slate-400">Top performers ranked by total dues collected.</p>
           </div>
-          <Link to="/leaderboard" className="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700">
+          <Link to="/leaderboard" className="inline-flex min-h-[44px] items-center justify-center sm:min-h-0 sm:justify-start py-2 text-xs font-semibold text-blue-600 hover:text-blue-700">
             Open leaderboard <ArrowUpRight size={14} className="ml-1" />
           </Link>
         </div>
@@ -295,7 +295,7 @@ const ChartCard = ({ title, subtitle, children }) => (
 const QuickLink = ({ to, label, icon }) => (
   <Link
     to={to}
-    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+    className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-white p-5 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
   >
     <span>{label}</span>
     <span className="rounded-full bg-slate-100 p-2 text-slate-500">{icon}</span>

@@ -51,11 +51,11 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="max-w-md w-full space-y-8 p-4 sm:p-8 bg-white rounded-lg shadow-md">
         <div>
           <Link to="/" className="block text-center mb-4">
-            <h2 className="text-3xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors">
               Dues Accountant
             </h2>
           </Link>
@@ -101,16 +101,16 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="group relative w-full flex justify-center min-h-[44px] items-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
           <div className="text-center space-y-2">
-            <Link to="/register" className="block text-sm text-blue-600 hover:text-blue-500">
+            <Link to="/register" className="block py-3 text-sm text-blue-600 hover:text-blue-500">
               Don't have an account? Register your organization
             </Link>
-            <Link to="/" className="block text-sm text-gray-600 hover:text-gray-800">
+            <Link to="/" className="block py-3 text-sm text-gray-600 hover:text-gray-800">
               ← Back to Home
             </Link>
           </div>

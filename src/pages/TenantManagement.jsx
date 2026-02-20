@@ -106,14 +106,15 @@ const TenantManagement = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Tenant Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Tenant Management</h1>
         <p className="text-gray-600 mt-1">Manage all tenants in the system (metadata only)</p>
       </div>
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -216,6 +217,7 @@ const TenantManagement = () => {
             ))}
           </tbody>
         </table>
+        </div>
 
         {tenants.length === 0 && (
           <div className="text-center py-12">
@@ -226,8 +228,8 @@ const TenantManagement = () => {
 
       {/* Edit Modal */}
       {showEditModal && selectedTenant && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Edit Tenant</h2>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
@@ -279,20 +281,20 @@ const TenantManagement = () => {
                   <option value="archived">Archived</option>
                 </select>
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:space-x-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedTenant(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="min-h-[44px] px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Save
                 </button>

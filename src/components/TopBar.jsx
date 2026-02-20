@@ -20,7 +20,7 @@ const TopBar = ({ onMobileToggle, user, onLogout }) => {
           <button
             type="button"
             onClick={onMobileToggle}
-            className="inline-flex items-center justify-center rounded-md p-2 text-slate-500 hover:bg-slate-100 lg:hidden transition"
+            className="inline-flex h-11 min-w-[44px] items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 lg:hidden transition"
           >
             <Menu size={20} />
             <span className="sr-only">Open sidebar</span>
@@ -52,7 +52,7 @@ const TopBar = ({ onMobileToggle, user, onLogout }) => {
           <button
             type="button"
             onClick={onLogout}
-            className="inline-flex items-center justify-center rounded-md bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 transition"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-red-500 px-4 py-3 text-sm font-medium text-white hover:bg-red-600 transition"
           >
             Logout
           </button>

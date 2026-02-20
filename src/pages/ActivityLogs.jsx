@@ -137,7 +137,7 @@ const ActivityLogs = () => {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Activity logs</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Activity logs</h1>
           <p className="text-sm text-slate-500">
             Minimal history of all recorded changes for transparency and accountability.
           </p>
@@ -357,7 +357,7 @@ const FilterDialog = ({ isOpen, onClose, draftFilters, setDraftFilters, applyFil
         <div className="fixed inset-0 bg-slate-900/40" />
       </Transition.Child>
       <div className="fixed inset-0 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-6">
+        <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
           <Transition.Child
             as={React.Fragment}
             enter="ease-out duration-200"

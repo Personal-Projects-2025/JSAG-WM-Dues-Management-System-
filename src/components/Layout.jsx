@@ -1,3 +1,6 @@
+/**
+ * App shell for protected routes. Mobile-first: see frontend/MOBILE_CHECKLIST.md for standards.
+ */
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
@@ -105,7 +108,7 @@ const Layout = ({ children }) => {
         {/* Pending Tenant Banner */}
         {tenant?.status === 'pending' && (
           <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="max-w-7xl mx-auto flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -123,7 +126,7 @@ const Layout = ({ children }) => {
           </div>
         )}
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">{children}</main>
           </div>
     </div>
   );

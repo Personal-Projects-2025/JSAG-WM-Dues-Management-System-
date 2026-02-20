@@ -27,19 +27,19 @@ const MarketingFooter = () => {
           {/* Quick Links */}
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               <li>
-                <Link to="/login" className="hover:text-white transition-colors">
+                <Link to="/login" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
                   Login
                 </Link>
               </li>
               <li>
-                <Link to="/register" className="hover:text-white transition-colors">
+                <Link to="/register" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
                   Register Organization
                 </Link>
               </li>
               <li>
-                <a href="#features" className="hover:text-white transition-colors">
+                <a href="#features" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
                   Features
                 </a>
               </li>
@@ -49,14 +49,14 @@ const MarketingFooter = () => {
           {/* Support */}
           <div>
             <h4 className="text-white font-semibold mb-4">Support</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               <li>
-                <a href="#faq" className="hover:text-white transition-colors">
+                <a href="#faq" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="mailto:winswardtech@gmail.com" className="hover:text-white transition-colors">
+                <a href="mailto:winswardtech@gmail.com" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
                   Contact Us
                 </a>
               </li>

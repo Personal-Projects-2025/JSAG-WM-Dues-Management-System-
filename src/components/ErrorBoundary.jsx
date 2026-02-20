@@ -58,7 +58,7 @@ const ErrorFallback = ({ error, errorInfo, onReset }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-4 sm:p-8">
         <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
           <AlertCircle className="w-8 h-8 text-red-600" aria-hidden="true" />
         </div>
@@ -85,7 +85,7 @@ const ErrorFallback = ({ error, errorInfo, onReset }) => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={onReset}
-            className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex-1 inline-flex min-h-[44px] items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             aria-label="Try again"
           >
             <RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -97,7 +97,7 @@ const ErrorFallback = ({ error, errorInfo, onReset }) => {
               onReset();
               navigate('/dashboard');
             }}
-            className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex-1 inline-flex min-h-[44px] items-center justify-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             aria-label="Go to home page"
           >
             <Home className="w-4 h-4 mr-2" aria-hidden="true" />

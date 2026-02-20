@@ -43,7 +43,7 @@ const Sidebar = ({
           </div>
           <button
             type="button"
-            className="inline-flex rounded-md p-2 text-slate-500 transition hover:bg-slate-100 lg:hidden"
+            className="inline-flex h-11 min-w-[44px] items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 lg:hidden"
             onClick={onMobileClose}
             aria-label="Close sidebar"
           >
@@ -63,7 +63,7 @@ const Sidebar = ({
                   onClick={onMobileClose}
                   className={({ isActive }) =>
                     clsx(
-                      'group relative flex items-center gap-3 rounded-lg px-2 py-2 text-[13px] font-medium transition-colors',
+                      'group relative flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-2.5 text-[13px] font-medium transition-colors',
                       isCollapsed ? 'justify-center' : 'justify-start',
                       isActive ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-100'
                     )

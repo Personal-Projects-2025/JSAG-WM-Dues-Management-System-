@@ -236,7 +236,7 @@ const Payments = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Record Payments</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Record Payments</h1>
           <p className="text-sm text-slate-500">
             Record contributions by type—dues, donations, offerings, and more.
           </p>
