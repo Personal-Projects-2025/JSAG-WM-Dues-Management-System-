@@ -1,3 +1,7 @@
 node_modules
 .env
 package-lock.json
+
+# Build output (never commit — can bundle env secrets)
+/build
+build
