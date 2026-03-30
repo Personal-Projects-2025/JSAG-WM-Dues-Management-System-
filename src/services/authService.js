@@ -49,6 +49,16 @@ export const authService = {
     return tenantStr ? JSON.parse(tenantStr) : null;
   },
 
+  forgotPassword: async (email) => {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    const response = await api.post('/auth/reset-password', { email, otp, newPassword });
+    return response.data;
+  },
+
   refreshToken: async () => {
     const response = await api.post('/auth/refresh');
     if (response.data.token) {

@@ -30,6 +30,8 @@ const TenantManagement = lazy(() => import('./pages/TenantManagement.jsx'));
 const MultiAdminDashboard = lazy(() => import('./pages/MultiAdminDashboard.jsx'));
 const SystemSettings = lazy(() => import('./pages/SystemSettings.jsx'));
 const TenantApproval = lazy(() => import('./pages/TenantApproval.jsx'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -52,6 +54,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<TenantRegistration />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/dashboard"
             element={

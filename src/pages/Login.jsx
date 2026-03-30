@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -94,20 +96,26 @@ const Login = () => {
                 onChange={(e) => setUsernameOrEmail(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+            <div className="relative">
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none z-10"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -121,10 +129,16 @@ const Login = () => {
             </button>
           </div>
           <div className="text-center space-y-2">
-            <Link to="/register" className="block py-3 text-sm text-blue-600 hover:text-blue-500">
+            <Link
+              to="/forgot-password"
+              className="block py-1 text-sm text-blue-600 hover:text-blue-500 font-medium"
+            >
+              Forgot your password?
+            </Link>
+            <Link to="/register" className="block py-2 text-sm text-blue-600 hover:text-blue-500">
               Don't have an account? Register your organization
             </Link>
-            <Link to="/" className="block py-3 text-sm text-gray-600 hover:text-gray-800">
+            <Link to="/" className="block py-2 text-sm text-gray-500 hover:text-gray-700">
               ← Back to Home
             </Link>
           </div>
