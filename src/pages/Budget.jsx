@@ -543,7 +543,6 @@ const RevenueBreakdownTable = ({ rows, emptyMessage, totals }) => {
             // Revenue: surplus (actual > target) is GOOD
             const surplus = line.actualAmount >= line.targetAmount;
             const nearTarget = !surplus && line.percentCollected !== null && line.percentCollected >= 75;
-            const shortfall = !surplus && !nearTarget;
             return (
               <tr key={i} className="hover:bg-slate-50 transition">
                 <td className="px-4 py-3 font-medium text-slate-800">{line.contributionTypeName}</td>
