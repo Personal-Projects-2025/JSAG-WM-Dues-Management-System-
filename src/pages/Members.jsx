@@ -26,6 +26,9 @@ import {
 import api from '../services/api.js';
 import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
+/** Default join date in the add-member form (user can change before save). */
+const DEFAULT_NEW_MEMBER_JOIN_DATE = '2026-01-01';
+
 const formatCurrency = (value) =>
   typeof value === 'number'
     ? `GHS ${value.toLocaleString(undefined, {
@@ -212,6 +215,7 @@ const MemberFormModal = ({
                       onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                     />
+                    <p className="text-xs text-slate-500">Defaults to 1 Jan 2026; change if needed.</p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-slate-700">Dues per month *</label>
@@ -632,7 +636,7 @@ const Members = () => {
     autoGenerateId: false,
     contact: '',
     email: '',
-    joinDate: new Date().toISOString().split('T')[0],
+    joinDate: DEFAULT_NEW_MEMBER_JOIN_DATE,
     duesPerMonth: '',
     subgroupId: ''
   });
@@ -697,7 +701,7 @@ const Members = () => {
       autoGenerateId: false,
       contact: '',
       email: '',
-      joinDate: new Date().toISOString().split('T')[0],
+      joinDate: DEFAULT_NEW_MEMBER_JOIN_DATE,
       duesPerMonth: '',
       subgroupId: ''
     });

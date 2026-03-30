@@ -1,5 +1,8 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import apiCache from '../utils/apiCache.js';
+
+const SESSION_INVALID_ERRORS = new Set(['User not found', 'Tenant not found']);
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://backendofduesaccountant.winswardtech.com/api';
 
@@ -24,15 +27,46 @@ api.interceptors.request.use(
   }
 );
 
-// Handle auth errors
+// Handle auth, rate limit, and stale session (JWT vs DB mismatch)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const apiError = error.response?.data?.error;
+
+    if (status === 429) {
+      const retryAfter = error.response?.headers?.['retry-after'];
+      const sec = retryAfter != null ? Number(retryAfter) : NaN;
+      let retryHint = ' Please wait a few minutes before trying again.';
+      if (!Number.isNaN(sec) && sec > 0) {
+        retryHint =
+          sec < 120
+            ? ` Try again in about ${Math.ceil(sec)} seconds.`
+            : ` Try again in about ${Math.ceil(sec / 60)} minute(s).`;
+      }
+      toast.warn((apiError || 'Too many requests.') + retryHint);
+      return Promise.reject(error);
+    }
+
+    if (status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
+      return Promise.reject(error);
     }
+
+    if (
+      status === 404 &&
+      localStorage.getItem('token') &&
+      apiError &&
+      SESSION_INVALID_ERRORS.has(apiError)
+    ) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login?session=invalid';
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );

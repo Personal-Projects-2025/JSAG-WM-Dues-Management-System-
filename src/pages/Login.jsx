@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
 
@@ -9,6 +9,20 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('session') !== 'invalid') return;
+    toast.info('Your session is no longer valid (account or organization may have changed). Please sign in again.');
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('session');
+        return next;
+      },
+      { replace: true }
+    );
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
