@@ -168,7 +168,7 @@ const Payments = () => {
         amount: formState.amount,
         date: formState.date || undefined,
         remarks: formState.remarks || undefined,
-        memberId: isDuesType && selectedMember ? selectedMember._id : undefined
+        memberId: selectedMember ? selectedMember._id : undefined
       };
       const response = await api.post('/contributions', payload);
       toast.success('Contribution recorded successfully');
@@ -259,7 +259,7 @@ const Payments = () => {
             <div>
               <h2 className="text-lg font-semibold text-slate-900">New contribution</h2>
               <p className="text-sm text-slate-500">
-                Select the type, amount, and optionally link to a member for dues.
+                Select the type, enter the amount, and optionally link a payer.
               </p>
             </div>
             <CreditCard size={20} className="text-blue-500" />
@@ -270,13 +270,7 @@ const Payments = () => {
             <select
               required
               value={formState.contributionTypeId}
-              onChange={(e) => {
-                setFormState({ ...formState, contributionTypeId: e.target.value });
-                if (!e.target.value || contributionTypes.find((t) => t._id === e.target.value)?.name?.toLowerCase() !== 'dues') {
-                  setSelectedMember(null);
-                  setMemberQuery('');
-                }
-              }}
+              onChange={(e) => setFormState({ ...formState, contributionTypeId: e.target.value })}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             >
               <option value="">Select type…</option>
@@ -286,9 +280,12 @@ const Payments = () => {
             </select>
           </div>
 
-          {isDuesType && (
+          {formState.contributionTypeId && (
             <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Member (optional)</label>
+              <label className="text-sm font-medium text-slate-700">
+                {isDuesType ? 'Member' : 'Payer'}{' '}
+                <span className="font-normal text-slate-400">(optional)</span>
+              </label>
               <Combobox value={selectedMember} onChange={setSelectedMember}>
                 <div className="relative">
                   <Combobox.Input
@@ -326,6 +323,15 @@ const Payments = () => {
                   </Transition>
                 </div>
               </Combobox>
+              {selectedMember && (
+                <button
+                  type="button"
+                  onClick={() => { setSelectedMember(null); setMemberQuery(''); }}
+                  className="mt-1 text-xs text-slate-400 hover:text-rose-500 transition-colors"
+                >
+                  ✕ Clear selected payer
+                </button>
+              )}
             </div>
           )}
 
@@ -388,7 +394,11 @@ const Payments = () => {
           )}
 
           <div className="flex items-center justify-between pt-2">
-            <p className="text-xs text-slate-400">Receipts are generated for dues payments when a member is selected.</p>
+            <p className="text-xs text-slate-400">
+              {selectedMember
+                ? `Receipt will be emailed to ${selectedMember.name}.`
+                : 'Optionally select a payer to link this contribution to a member.'}
+            </p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -419,37 +429,64 @@ const Payments = () => {
         <div className="col-span-1 space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <header className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Member snapshot</h2>
-              <p className="text-sm text-slate-500">Shown when recording dues for a member.</p>
+              <h2 className="text-lg font-semibold text-slate-900">Payer snapshot</h2>
+              <p className="text-sm text-slate-500">Details of the selected payer / member.</p>
             </div>
             <User size={20} className="text-blue-500" />
           </header>
           {selectedMember ? (
             <div className="space-y-4 text-sm text-slate-600">
+              <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+                <p className="font-semibold text-blue-800 text-base">{selectedMember.name}</p>
+                {selectedMember.memberId && (
+                  <p className="text-xs text-blue-600 mt-0.5">ID: {selectedMember.memberId}</p>
+                )}
+              </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">Email</p>
-                <p className="font-medium text-slate-700">{selectedMember.email || 'Not provided'}</p>
+                <p className="font-medium text-slate-700">
+                  {selectedMember.email
+                    ? <span className="flex items-center gap-1"><Mail size={13} className="text-emerald-500" />{selectedMember.email}</span>
+                    : <span className="text-slate-400 italic">No email on file</span>}
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs uppercase tracking-wide text-slate-400">Last payment</p>
-                  <p className="font-medium text-slate-700">
+                  <p className="font-medium text-slate-700 text-xs mt-0.5">
                     {selectedMember.lastPaymentDate ? new Date(selectedMember.lastPaymentDate).toLocaleDateString() : 'Not recorded'}
                   </p>
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Arrears</p>
-                  <p className="font-medium text-rose-600">{selectedMember.arrears || 0} months</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Total paid</p>
+                  <p className="font-semibold text-emerald-600 text-xs mt-0.5">{formatCurrency(Number(selectedMember.totalPaid || 0))}</p>
                 </div>
               </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Total paid</p>
-                <p className="text-lg font-semibold text-emerald-600">{formatCurrency(Number(selectedMember.totalPaid || 0))}</p>
-              </div>
+              {isDuesType && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Arrears</p>
+                    <p className={`font-medium text-xs mt-0.5 ${selectedMember.arrears > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      {selectedMember.arrears || 0} month{selectedMember.arrears !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Outstanding</p>
+                    <p className="font-medium text-rose-600 text-xs mt-0.5">{formatCurrency(outstandingBalance)}</p>
+                  </div>
+                </div>
+              )}
+              {!selectedMember.email && (
+                <p className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2 text-xs text-amber-700">
+                  No email address — receipt will not be emailed automatically.
+                </p>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-              {isDuesType ? 'Select a member above to see their dues status.' : 'Select Dues as the contribution type and optionally link a member.'}
+              {formState.contributionTypeId
+                ? 'Search and select a payer above to link them to this contribution.'
+                : 'Select a contribution type first, then optionally choose a payer.'}
             </div>
           )}
         </div>
