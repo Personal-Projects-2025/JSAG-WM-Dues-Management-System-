@@ -10,6 +10,7 @@ import {
   MailOpen,
   Search,
   Send,
+  Settings,
   Users,
   X
 } from 'lucide-react';
@@ -125,6 +126,13 @@ const Reminders = () => {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <a
+            href="/settings"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-100"
+          >
+            <Settings size={16} className="mr-2" />
+            Schedule settings
+          </a>
           <button
             onClick={handleSendNow}
             disabled={sending}
@@ -200,6 +208,12 @@ const Reminders = () => {
 
 export default Reminders;
 
+const ordinalSuffix = (n) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
 const ReminderSummary = ({ summary }) => (
   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
     <SummaryTile
@@ -214,6 +228,7 @@ const ReminderSummary = ({ summary }) => (
         month: 'short',
         day: 'numeric'
       })}
+      subvalue={summary.reminderDay ? `Scheduled: ${ordinalSuffix(summary.reminderDay)} of each month` : null}
       icon={<CalendarDays size={18} className="text-purple-500" />}
     />
     <SummaryTile
@@ -229,13 +244,14 @@ const ReminderSummary = ({ summary }) => (
   </div>
 );
 
-const SummaryTile = ({ label, value, icon }) => (
+const SummaryTile = ({ label, value, subvalue, icon }) => (
   <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
     <div className="flex items-center justify-between">
       <span className="text-sm font-medium text-slate-500">{label}</span>
       {icon}
     </div>
     <p className="mt-2 text-lg font-semibold text-slate-900">{value}</p>
+    {subvalue && <p className="text-xs text-slate-400 mt-0.5">{subvalue}</p>}
   </div>
 );
 
