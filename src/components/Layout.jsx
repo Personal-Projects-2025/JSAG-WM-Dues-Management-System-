@@ -17,7 +17,8 @@ import {
   Settings as SettingsIcon,
   Building2,
   CheckCircle2,
-  PieChart
+  PieChart,
+  PiggyBank
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import Sidebar from './Sidebar.jsx';
@@ -51,6 +52,7 @@ const Layout = ({ children }) => {
       { path: '/members', label: 'Members', icon: Users },
       { path: '/payments', label: 'Payments', icon: CreditCard },
       { path: '/expenditure', label: 'Expenditure', icon: Wallet },
+      { path: '/budget', label: 'Budget', icon: PiggyBank },
       { path: '/financial-breakdown', label: 'Financial Breakdown', icon: PieChart },
       { path: '/reminders', label: 'Reminders', icon: Bell },
       { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },

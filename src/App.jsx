@@ -17,6 +17,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
 const Members = lazy(() => import('./pages/Members.jsx'));
 const Payments = lazy(() => import('./pages/Payments.jsx'));
 const Expenditure = lazy(() => import('./pages/Expenditure.jsx'));
+const Budget = lazy(() => import('./pages/Budget.jsx'));
 const Reports = lazy(() => import('./pages/Reports.jsx'));
 const ActivityLogs = lazy(() => import('./pages/ActivityLogs.jsx'));
 const Settings = lazy(() => import('./pages/Settings.jsx'));
@@ -87,6 +88,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Expenditure />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/budget"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Budget />
                 </Layout>
               </ProtectedRoute>
             }
