@@ -1,87 +1,150 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import {
+  Eye, EyeOff, ChevronDown, ChevronUp,
+  CheckCircle2, Building2, Shield, Loader2
+} from 'lucide-react';
+import clsx from 'clsx';
 import api from '../services/api.js';
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const generateSlug = (name) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const getPasswordStrength = (password) => {
+  if (!password) return { score: 0, label: '', color: '' };
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  const map = [
+    { label: 'Too short',  color: 'bg-red-400',     textColor: 'text-red-500'     },
+    { label: 'Weak',       color: 'bg-red-400',     textColor: 'text-red-500'     },
+    { label: 'Fair',       color: 'bg-amber-400',   textColor: 'text-amber-500'   },
+    { label: 'Good',       color: 'bg-blue-400',    textColor: 'text-blue-500'    },
+    { label: 'Strong',     color: 'bg-emerald-500', textColor: 'text-emerald-600' },
+  ];
+  return { score, ...map[score] };
+};
+
+// ─── Step config ─────────────────────────────────────────────────────────────
+
+const STEPS = [
+  { id: 1, label: 'Organization', icon: Building2 },
+  { id: 2, label: 'Admin Account', icon: Shield    },
+];
+
+// ─── Shared style tokens ─────────────────────────────────────────────────────
+
+const inputCls =
+  'block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 ' +
+  'placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+  'focus:border-transparent transition';
+
+const primaryBtn =
+  'w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white ' +
+  'font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+
+const secondaryBtn =
+  'py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors';
+
+// ─── Field wrapper ────────────────────────────────────────────────────────────
+
+const Field = ({ label, required, hint, children }) => (
+  <div className="space-y-1">
+    <label className="block text-sm font-medium text-slate-700">
+      {label}
+      {required && <span className="text-red-500 ml-0.5">*</span>}
+    </label>
+    {children}
+    {hint && <p className="text-xs text-slate-400 mt-1">{hint}</p>}
+  </div>
+);
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 const TenantRegistration = () => {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [step, setStep]               = useState(1);
+  const [done, setDone]               = useState(false);
+  const [loading, setLoading]         = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [slugTouched, setSlugTouched]   = useState(false);
+  const [dbNameTouched, setDbNameTouched] = useState(false);
+
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    databaseName: '',
+    name:          '',
+    slug:          '',
+    databaseName:  '',
     adminUsername: '',
     adminPassword: '',
-    adminEmail: '',
-    contactEmail: '',
-    contactPhone: '',
+    adminEmail:    '',
+    contactEmail:  '',
+    contactPhone:  '',
     branding: {
-      name: '',
-      primaryColor: '#3B82F6',
-      secondaryColor: '#1E40AF'
-    }
+      name:           '',
+      primaryColor:   '#3B82F6',
+      secondaryColor: '#1E40AF',
+    },
   });
-  const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.startsWith('branding.')) {
-      const brandingKey = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        branding: {
-          ...prev.branding,
-          [brandingKey]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
+  const strength = getPasswordStrength(formData.adminPassword);
 
-  const generateSlug = (name) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
+  // Simple field setter
+  const set = (key, value) =>
+    setFormData((prev) => ({ ...prev, [key]: value }));
 
+  // Org name drives slug + dbName (unless the user has manually edited them)
   const handleNameChange = (e) => {
     const name = e.target.value;
-    setFormData(prev => ({
+    const slug = generateSlug(name);
+    setFormData((prev) => ({
       ...prev,
       name,
-      slug: prev.slug || generateSlug(name),
-      databaseName: prev.databaseName || generateSlug(name).replace(/-/g, '_'),
-      branding: {
-        ...prev.branding,
-        name: prev.branding.name || name
-      }
+      slug:         slugTouched   ? prev.slug         : slug,
+      databaseName: dbNameTouched ? prev.databaseName : slug.replace(/-/g, '_'),
+      branding: { ...prev.branding, name: prev.branding.name || name },
     }));
   };
 
+  const handleSlugChange = (e) => {
+    setSlugTouched(true);
+    set('slug', e.target.value);
+  };
+
+  const handleDbNameChange = (e) => {
+    setDbNameTouched(true);
+    set('databaseName', e.target.value);
+  };
+
+  // ── Validation ──────────────────────────────────────────────────────────────
+
   const validateStep1 = () => {
-    if (!formData.name || !formData.slug || !formData.databaseName) {
-      toast.error('Please fill in all required fields');
+    if (!formData.name.trim()) {
+      toast.error('Organization name is required');
       return false;
     }
-    if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      toast.error('Slug can only contain lowercase letters, numbers, and hyphens');
+    if (!formData.slug || !/^[a-z0-9-]+$/.test(formData.slug)) {
+      toast.error('Slug must use lowercase letters, numbers, and hyphens only');
       return false;
     }
-    if (!/^[a-z0-9_-]+$/.test(formData.databaseName)) {
-      toast.error('Database name can only contain lowercase letters, numbers, underscores, and hyphens');
+    if (!formData.databaseName || !/^[a-z0-9_-]+$/.test(formData.databaseName)) {
+      toast.error('Database name must use lowercase letters, numbers, underscores, and hyphens only');
       return false;
     }
     return true;
   };
 
   const validateStep2 = () => {
-    if (!formData.adminUsername || !formData.adminPassword || !formData.adminEmail) {
-      toast.error('Please fill in all required fields');
+    if (!formData.adminUsername.trim()) {
+      toast.error('Username is required');
+      return false;
+    }
+    if (!formData.adminEmail.trim()) {
+      toast.error('Admin email is required');
       return false;
     }
     if (formData.adminPassword.length < 6) {
@@ -91,15 +154,15 @@ const TenantRegistration = () => {
     return true;
   };
 
+  // ── Submit ──────────────────────────────────────────────────────────────────
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateStep2()) return;
     setLoading(true);
-
     try {
       await api.post('/tenant-setup/register', formData);
-      toast.success('Organization registration submitted successfully!');
-      toast.info('Your organization is pending approval. You will receive an email notification once approved.');
-      navigate('/login');
+      setDone(true);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Registration failed');
     } finally {
@@ -107,235 +170,303 @@ const TenantRegistration = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8 bg-white rounded-lg shadow-lg p-4 sm:p-8">
-        <div>
-          <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
-            Register Your Organization
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Create your tenant account to get started
-          </p>
-        </div>
+  // ── Success screen ──────────────────────────────────────────────────────────
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
-              1
-            </div>
-            <div className={`w-24 h-1 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
-              2
-            </div>
-            <div className={`w-24 h-1 ${step >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
-              3
+  if (done) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+              <CheckCircle2 className="text-emerald-600" size={36} />
             </div>
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Step 1: Organization Details */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Organization Information</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Organization Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleNameChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Slug *</label>
-                <input
-                  type="text"
-                  name="slug"
-                  required
-                  value={formData.slug}
-                  onChange={handleInputChange}
-                  pattern="[a-z0-9-]+"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-                <p className="mt-1 text-xs text-gray-500">URL-friendly identifier (lowercase, numbers, hyphens only)</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Database Name *</label>
-                <input
-                  type="text"
-                  name="databaseName"
-                  required
-                  value={formData.databaseName}
-                  onChange={handleInputChange}
-                  pattern="[a-z0-9_-]+"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-                <p className="mt-1 text-xs text-gray-500">Database identifier (lowercase, numbers, underscores, hyphens only)</p>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => validateStep1() && setStep(2)}
-                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Registration Submitted!</h2>
+            <p className="mt-2 text-slate-500 text-sm">
+              <span className="font-semibold text-blue-600">{formData.name}</span> has been
+              registered and is now pending approval.
+            </p>
+          </div>
 
-          {/* Step 2: Admin Account */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Admin Account</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Admin Username *</label>
-                <input
-                  type="text"
-                  name="adminUsername"
-                  required
-                  value={formData.adminUsername}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Admin Password *</label>
-                <input
-                  type="password"
-                  name="adminPassword"
-                  required
-                  value={formData.adminPassword}
-                  onChange={handleInputChange}
-                  minLength={6}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Admin Email *</label>
-                <input
-                  type="email"
-                  name="adminEmail"
-                  required
-                  value={formData.adminEmail}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="min-h-[44px] px-4 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={() => validateStep2() && setStep(3)}
-                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="bg-blue-50 rounded-xl p-4 text-sm text-left space-y-2">
+            <p className="font-semibold text-blue-900">What happens next?</p>
+            <ul className="space-y-1.5 text-blue-700 list-disc list-inside">
+              <li>Your registration is under review</li>
+              <li>You will receive a confirmation email shortly</li>
+              <li>Once approved, sign in with your admin credentials</li>
+            </ul>
+          </div>
 
-          {/* Step 3: Branding & Contact */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Branding & Contact (Optional)</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Display Name</label>
-                <input
-                  type="text"
-                  name="branding.name"
-                  value={formData.branding.name}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Primary Color</label>
-                  <input
-                    type="color"
-                    name="branding.primaryColor"
-                    value={formData.branding.primaryColor}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full h-10 rounded-md border-gray-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Secondary Color</label>
-                  <input
-                    type="color"
-                    name="branding.secondaryColor"
-                    value={formData.branding.secondaryColor}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full h-10 rounded-md border-gray-300"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contact Email</label>
-                <input
-                  type="email"
-                  name="contactEmail"
-                  value={formData.contactEmail}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
-                <input
-                  type="tel"
-                  name="contactPhone"
-                  value={formData.contactPhone}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="min-h-[44px] px-4 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="min-h-[44px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? 'Registering...' : 'Register'}
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-
-        <div className="text-center mt-4 space-y-2">
-          <Link to="/login" className="block text-sm text-blue-600 hover:text-blue-500">
-            Already have an account? Sign in
-          </Link>
-          <Link to="/" className="block text-sm text-gray-600 hover:text-gray-800">
-            ← Back to Home
+          <Link
+            to="/login"
+            className="block w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+          >
+            Go to Sign In
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  // ── Registration form ───────────────────────────────────────────────────────
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
+      <div className="max-w-lg w-full">
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block">
+            <h1 className="text-3xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors">
+              Dues Accountant
+            </h1>
+          </Link>
+          <p className="mt-2 text-slate-500 text-sm">Register your organization to get started</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-8">
+
+          {/* Step indicator */}
+          <div className="flex items-center">
+            {STEPS.map((s, idx) => {
+              const Icon    = s.icon;
+              const active  = step === s.id;
+              const isDone  = step > s.id;
+              return (
+                <React.Fragment key={s.id}>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className={clsx(
+                      'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
+                      isDone  ? 'bg-emerald-500 text-white' :
+                      active  ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
+                                'bg-slate-100 text-slate-400'
+                    )}>
+                      {isDone ? <CheckCircle2 size={18} /> : <Icon size={18} />}
+                    </div>
+                    <span className={clsx(
+                      'text-xs font-medium whitespace-nowrap',
+                      active  ? 'text-blue-600'   :
+                      isDone  ? 'text-emerald-600' :
+                                'text-slate-400'
+                    )}>
+                      {s.label}
+                    </span>
+                  </div>
+                  {idx < STEPS.length - 1 && (
+                    <div className={clsx(
+                      'flex-1 h-0.5 mx-3 mb-4 rounded-full transition-all duration-300',
+                      step > s.id ? 'bg-emerald-500' : 'bg-slate-200'
+                    )} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+
+            {/* ── Step 1: Organization ── */}
+            {step === 1 && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">Organization Details</h2>
+                  <p className="text-sm text-slate-500 mt-0.5">Tell us about your organization</p>
+                </div>
+
+                <Field label="Organization Name" required>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={handleNameChange}
+                    placeholder="e.g. Grace Community Church"
+                    className={inputCls}
+                    autoFocus
+                  />
+                </Field>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Contact Email">
+                    <input
+                      type="email"
+                      value={formData.contactEmail}
+                      onChange={(e) => set('contactEmail', e.target.value)}
+                      placeholder="contact@org.com"
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label="Contact Phone">
+                    <input
+                      type="tel"
+                      value={formData.contactPhone}
+                      onChange={(e) => set('contactPhone', e.target.value)}
+                      placeholder="+1 234 567 8900"
+                      className={inputCls}
+                    />
+                  </Field>
+                </div>
+
+                {/* Advanced toggle */}
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  Advanced settings
+                </button>
+
+                {showAdvanced && (
+                  <div className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <Field label="Slug" hint="Auto-generated — URL-friendly identifier (lowercase, numbers, hyphens)">
+                      <input
+                        type="text"
+                        value={formData.slug}
+                        onChange={handleSlugChange}
+                        pattern="[a-z0-9-]+"
+                        className={inputCls}
+                      />
+                    </Field>
+                    <Field label="Database Name" hint="Auto-generated from organization name (lowercase, numbers, underscores)">
+                      <input
+                        type="text"
+                        value={formData.databaseName}
+                        onChange={handleDbNameChange}
+                        pattern="[a-z0-9_-]+"
+                        className={inputCls}
+                      />
+                    </Field>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => validateStep1() && setStep(2)}
+                    className={primaryBtn}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Step 2: Admin Account ── */}
+            {step === 2 && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">Admin Account</h2>
+                  <p className="text-sm text-slate-500 mt-0.5">
+                    This will be your login to manage{' '}
+                    <span className="font-medium text-blue-600">{formData.name}</span>
+                  </p>
+                </div>
+
+                <Field label="Username" required>
+                  <input
+                    type="text"
+                    value={formData.adminUsername}
+                    onChange={(e) => set('adminUsername', e.target.value)}
+                    placeholder="Choose a username"
+                    className={inputCls}
+                    autoFocus
+                    autoComplete="username"
+                  />
+                </Field>
+
+                <Field label="Email" required>
+                  <input
+                    type="email"
+                    value={formData.adminEmail}
+                    onChange={(e) => set('adminEmail', e.target.value)}
+                    placeholder="admin@yourorg.com"
+                    className={inputCls}
+                    autoComplete="email"
+                  />
+                </Field>
+
+                <Field label="Password" required>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.adminPassword}
+                      onChange={(e) => set('adminPassword', e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className={clsx(inputCls, 'pr-10')}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  {/* Password strength meter */}
+                  {formData.adminPassword && (
+                    <div className="mt-2 space-y-1">
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div
+                            key={i}
+                            className={clsx(
+                              'h-1 flex-1 rounded-full transition-all duration-200',
+                              i <= strength.score ? strength.color : 'bg-slate-200'
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <p className={clsx('text-xs', strength.textColor)}>{strength.label}</p>
+                    </div>
+                  )}
+                </Field>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className={secondaryBtn}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={clsx(primaryBtn, 'flex-1')}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 size={16} className="animate-spin" />
+                        Registering…
+                      </span>
+                    ) : (
+                      'Register Organization'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </form>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-sm text-slate-500 mt-6">
+          Already have an account?{' '}
+          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+            Sign in
+          </Link>
+        </p>
+
       </div>
     </div>
   );
 };
 
 export default TenantRegistration;
-
-
