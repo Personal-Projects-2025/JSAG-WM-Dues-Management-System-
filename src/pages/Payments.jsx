@@ -393,13 +393,9 @@ const Payments = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-2">
-            <p className="text-xs text-slate-400">
-              {selectedMember
-                ? `Receipt will be emailed to ${selectedMember.name}.`
-                : 'Optionally select a payer to link this contribution to a member.'}
-            </p>
-            <div className="flex items-center gap-2">
+          {/* Action row */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -407,14 +403,14 @@ const Payments = () => {
                   setSelectedMember(null);
                   setMemberQuery('');
                 }}
-                className="inline-flex items-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
               >
                 Clear
               </button>
               <button
                 type="submit"
                 disabled={submitting || !formState.contributionTypeId || !formState.amount}
-                className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex-1 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? (
                   <><Loader2 size={16} className="mr-2 animate-spin" />Saving…</>
@@ -422,6 +418,29 @@ const Payments = () => {
                   <><Send size={16} className="mr-2" />Record contribution</>
                 )}
               </button>
+            </div>
+
+            {/* Email / payer hint — sits below both buttons */}
+            <div className="flex items-center justify-center gap-1.5 text-xs text-center">
+              {selectedMember?.email ? (
+                <>
+                  <Mail size={12} className="text-emerald-500 flex-shrink-0" />
+                  <span className="text-emerald-700">
+                    A receipt will be emailed to <strong>{selectedMember.name}</strong> ({selectedMember.email})
+                  </span>
+                </>
+              ) : selectedMember && !selectedMember.email ? (
+                <>
+                  <Mail size={12} className="text-amber-500 flex-shrink-0" />
+                  <span className="text-amber-700">
+                    <strong>{selectedMember.name}</strong> has no email on file — receipt won't be sent automatically
+                  </span>
+                </>
+              ) : (
+                <span className="text-slate-400">
+                  Select a payer above to link this contribution and auto-send their receipt
+                </span>
+              )}
             </div>
           </div>
         </form>
