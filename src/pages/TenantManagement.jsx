@@ -78,8 +78,7 @@ const TenantManagement = () => {
     if (user?.role === 'system') fetchTenants();
   }, [user, fetchTenants]);
 
-  const fetchTenantUsers = async (tenantId) => {
-    if (tenantUsers[tenantId]) return; // already loaded
+  const fetchTenantUsers = useCallback(async (tenantId) => {
     setUsersLoading(p => ({ ...p, [tenantId]: true }));
     try {
       const res = await api.get(`/system/tenant-users/${tenantId}`);
@@ -89,7 +88,7 @@ const TenantManagement = () => {
     } finally {
       setUsersLoading(p => ({ ...p, [tenantId]: false }));
     }
-  };
+  }, []);
 
   // ── tenant actions ─────────────────────────────────────────────────────────
 
@@ -154,7 +153,11 @@ const TenantManagement = () => {
       setExpandedTenantId(null);
     } else {
       setExpandedTenantId(tenantId);
-      fetchTenantUsers(tenantId);
+      // only fetch if we don't have data yet
+      setTenantUsers(prev => {
+        if (!prev[tenantId]) fetchTenantUsers(tenantId);
+        return prev;
+      });
     }
   };
 
@@ -163,9 +166,15 @@ const TenantManagement = () => {
     try {
       await api.patch(`/system/tenant-users/${userId}/role`, { role: newRole });
       toast.success(`Role changed to ${ROLE_LABELS[newRole]}`);
-      // refresh the users list for this tenant
-      setTenantUsers(p => ({ ...p, [tenantId]: undefined }));
-      await fetchTenantUsers(tenantId);
+      // update the single user in state directly — no re-fetch needed
+      setTenantUsers(prev => ({
+        ...prev,
+        [tenantId]: (prev[tenantId] || []).map(u =>
+          (u.id === userId || String(u.id) === String(userId))
+            ? { ...u, role: newRole }
+            : u
+        )
+      }));
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to update role');
     } finally {
@@ -374,53 +383,54 @@ const TenantManagement = () => {
                                   No admin users found for this organisation
                                 </div>
                               ) : (
-                                <table className="min-w-full text-sm">
-                                  <thead>
-                                    <tr className="border-b border-gray-100">
-                                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Username</th>
-                                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
-                                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Current Role</th>
-                                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Last Login</th>
-                                      <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Change Role</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-gray-50">
-                                    {users.map(u => (
-                                      <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-gray-800">{u.username}</td>
-                                        <td className="px-4 py-3 text-gray-500">{u.email || '—'}</td>
-                                        <td className="px-4 py-3"><RoleBadge role={u.role} /></td>
-                                        <td className="px-4 py-3 text-gray-400 text-xs">
-                                          {u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never'}
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                          {roleUpdating[u.id] ? (
-                                            <div className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-                                              <div className="w-3.5 h-3.5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                                              Saving…
-                                            </div>
-                                          ) : u.role === 'admin' ? (
-                                            <button
-                                              onClick={() => handleRoleChange(tid, u.id, 'super')}
-                                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-xs font-medium rounded-lg hover:bg-violet-700 transition-colors"
-                                            >
-                                              <ShieldCheck size={12} />
-                                              Promote to Super Admin
-                                            </button>
-                                          ) : (
-                                            <button
-                                              onClick={() => handleRoleChange(tid, u.id, 'admin')}
-                                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors"
-                                            >
-                                              <ShieldOff size={12} />
-                                              Demote to Admin
-                                            </button>
-                                          )}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                                <div className="divide-y divide-gray-100">
+                                  {users.map(u => (
+                                    <div key={u.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                      {/* user info */}
+                                      <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                          {u.username?.[0]?.toUpperCase() || '?'}
+                                        </div>
+                                        <div className="min-w-0">
+                                          <p className="text-sm font-semibold text-gray-800 truncate">{u.username}</p>
+                                          <p className="text-xs text-gray-400 truncate">{u.email || '—'}</p>
+                                        </div>
+                                      </div>
+
+                                      {/* meta */}
+                                      <div className="flex items-center gap-3 sm:gap-4 ml-11 sm:ml-0 shrink-0">
+                                        <RoleBadge role={u.role} />
+                                        <span className="text-xs text-gray-400 hidden sm:block">
+                                          {u.lastLogin ? `Last login ${new Date(u.lastLogin).toLocaleDateString()}` : 'Never logged in'}
+                                        </span>
+
+                                        {/* action button */}
+                                        {roleUpdating[u.id] ? (
+                                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-400 bg-gray-50 rounded-lg border border-gray-200">
+                                            <div className="w-3.5 h-3.5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                                            Saving…
+                                          </div>
+                                        ) : u.role === 'admin' ? (
+                                          <button
+                                            onClick={() => handleRoleChange(tid, u.id, 'super')}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-xs font-semibold rounded-lg hover:bg-violet-700 active:scale-95 transition-all whitespace-nowrap"
+                                          >
+                                            <ShieldCheck size={13} />
+                                            Promote to Super Admin
+                                          </button>
+                                        ) : (
+                                          <button
+                                            onClick={() => handleRoleChange(tid, u.id, 'admin')}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-700 text-xs font-semibold rounded-lg border border-gray-300 hover:bg-gray-50 active:scale-95 transition-all whitespace-nowrap"
+                                          >
+                                            <ShieldOff size={13} />
+                                            Demote to Admin
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
                           </td>
