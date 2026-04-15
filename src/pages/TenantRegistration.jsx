@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -75,6 +75,13 @@ const TenantRegistration = () => {
   const [slugTouched, setSlugTouched]   = useState(false);
   const [dbNameTouched, setDbNameTouched] = useState(false);
 
+  const [registrationSessionId, setRegistrationSessionId] = useState(null);
+  const [emailOtp, setEmailOtp] = useState('');
+  const [phoneOtp, setPhoneOtp] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [otpBusy, setOtpBusy] = useState(false);
+
   const [formData, setFormData] = useState({
     name:          '',
     slug:          '',
@@ -135,6 +142,10 @@ const TenantRegistration = () => {
       toast.error('Database name must use lowercase letters, numbers, underscores, and hyphens only');
       return false;
     }
+    if (!formData.contactPhone?.trim()) {
+      toast.error('Contact phone is required (for SMS verification)');
+      return false;
+    }
     return true;
   };
 
@@ -147,11 +158,116 @@ const TenantRegistration = () => {
       toast.error('Admin email is required');
       return false;
     }
+    if (!formData.contactPhone?.trim()) {
+      toast.error('Contact phone is required for SMS verification');
+      return false;
+    }
     if (formData.adminPassword.length < 6) {
       toast.error('Password must be at least 6 characters');
       return false;
     }
+    if (!emailVerified || !phoneVerified) {
+      toast.error('Verify your email and phone with the codes we send');
+      return false;
+    }
     return true;
+  };
+
+  useEffect(() => {
+    if (step !== 2 || registrationSessionId) return;
+    (async () => {
+      try {
+        const { data } = await api.post('/tenant-setup/register/session');
+        if (data?.sessionId) setRegistrationSessionId(data.sessionId);
+      } catch (err) {
+        console.error(err);
+        toast.error('Could not start registration session. Refresh and try again.');
+      }
+    })();
+  }, [step, registrationSessionId]);
+
+  const sendEmailCode = async () => {
+    if (!registrationSessionId || !formData.adminEmail.trim()) {
+      toast.error('Enter admin email first');
+      return;
+    }
+    setOtpBusy(true);
+    try {
+      await api.post('/tenant-setup/register/verify-email/send', {
+        sessionId: registrationSessionId,
+        adminEmail: formData.adminEmail.trim()
+      });
+      toast.success('Check your email for a verification code');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to send email code');
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
+  const verifyEmailCode = async () => {
+    if (!emailOtp.trim()) {
+      toast.error('Enter the email code');
+      return;
+    }
+    setOtpBusy(true);
+    try {
+      await api.post('/tenant-setup/register/verify-email', {
+        sessionId: registrationSessionId,
+        adminEmail: formData.adminEmail.trim(),
+        otp: emailOtp.trim()
+      });
+      setEmailVerified(true);
+      toast.success('Email verified');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Invalid code');
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
+  const sendPhoneCode = async () => {
+    if (!registrationSessionId || !formData.contactPhone?.trim()) {
+      toast.error('Enter contact phone first');
+      return;
+    }
+    if (!emailVerified) {
+      toast.error('Verify your email first');
+      return;
+    }
+    setOtpBusy(true);
+    try {
+      await api.post('/tenant-setup/register/verify-phone/send', {
+        sessionId: registrationSessionId,
+        contactPhone: formData.contactPhone.trim()
+      });
+      toast.success('Check your phone for an SMS code');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to send SMS');
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
+  const verifyPhoneCode = async () => {
+    if (!phoneOtp.trim()) {
+      toast.error('Enter the SMS code');
+      return;
+    }
+    setOtpBusy(true);
+    try {
+      await api.post('/tenant-setup/register/verify-phone', {
+        sessionId: registrationSessionId,
+        contactPhone: formData.contactPhone.trim(),
+        otp: phoneOtp.trim()
+      });
+      setPhoneVerified(true);
+      toast.success('Phone verified');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Invalid code');
+    } finally {
+      setOtpBusy(false);
+    }
   };
 
   // ── Submit ──────────────────────────────────────────────────────────────────
@@ -161,7 +277,10 @@ const TenantRegistration = () => {
     if (!validateStep2()) return;
     setLoading(true);
     try {
-      await api.post('/tenant-setup/register', formData);
+      await api.post('/tenant-setup/register', {
+        ...formData,
+        sessionId: registrationSessionId
+      });
       setDone(true);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Registration failed');
@@ -298,12 +417,12 @@ const TenantRegistration = () => {
                       className={inputCls}
                     />
                   </Field>
-                  <Field label="Contact Phone">
+                  <Field label="Contact Phone" required hint="Required — SMS verification code will be sent here">
                     <input
                       type="tel"
                       value={formData.contactPhone}
                       onChange={(e) => set('contactPhone', e.target.value)}
-                      placeholder="+1 234 567 8900"
+                      placeholder="e.g. 0244123456"
                       className={inputCls}
                     />
                   </Field>
@@ -377,16 +496,79 @@ const TenantRegistration = () => {
                   />
                 </Field>
 
-                <Field label="Email" required>
+                <Field label="Admin email" required hint="Login email; we will send a verification code">
                   <input
                     type="email"
                     value={formData.adminEmail}
-                    onChange={(e) => set('adminEmail', e.target.value)}
+                    onChange={(e) => {
+                      set('adminEmail', e.target.value);
+                      setEmailVerified(false);
+                    }}
                     placeholder="admin@yourorg.com"
                     className={inputCls}
                     autoComplete="email"
                   />
                 </Field>
+
+                <p className="text-xs text-slate-500">
+                  Phone for SMS verification was entered in step 1 (Contact phone). Change it there if needed.
+                </p>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+                  <p className="text-sm font-medium text-slate-800">Verify email &amp; phone</p>
+                  <div className="flex flex-wrap gap-2 items-end">
+                    <button
+                      type="button"
+                      disabled={otpBusy || !registrationSessionId}
+                      onClick={sendEmailCode}
+                      className="py-2 px-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                    >
+                      Send email code
+                    </button>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={emailOtp}
+                      onChange={(e) => setEmailOtp(e.target.value)}
+                      placeholder="Email OTP"
+                      className={clsx(inputCls, 'max-w-[140px]')}
+                    />
+                    <button
+                      type="button"
+                      disabled={otpBusy || emailVerified}
+                      onClick={verifyEmailCode}
+                      className="py-2 px-3 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      {emailVerified ? 'Verified' : 'Verify email'}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 items-end">
+                    <button
+                      type="button"
+                      disabled={otpBusy || !emailVerified || phoneVerified}
+                      onClick={sendPhoneCode}
+                      className="py-2 px-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                    >
+                      Send SMS code
+                    </button>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={phoneOtp}
+                      onChange={(e) => setPhoneOtp(e.target.value)}
+                      placeholder="SMS OTP"
+                      className={clsx(inputCls, 'max-w-[140px]')}
+                    />
+                    <button
+                      type="button"
+                      disabled={otpBusy || phoneVerified}
+                      onClick={verifyPhoneCode}
+                      className="py-2 px-3 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      {phoneVerified ? 'Verified' : 'Verify phone'}
+                    </button>
+                  </div>
+                </div>
 
                 <Field label="Password" required>
                   <div className="relative">

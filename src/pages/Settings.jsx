@@ -46,6 +46,8 @@ const Settings = () => {
   // Reminder settings
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [reminderDay, setReminderDay] = useState(25);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(true);
   const [savingReminder, setSavingReminder] = useState(false);
 
   // Appreciation settings
@@ -65,6 +67,8 @@ const Settings = () => {
       const { data } = await api.get('/settings');
       setReminderEnabled(data.settings.reminderEnabled ?? true);
       setReminderDay(data.settings.reminderDay ?? 25);
+      setEmailNotifications(data.settings.emailNotifications ?? true);
+      setSmsNotifications(data.settings.smsNotifications ?? true);
       setAppreciationEnabled(data.settings.appreciationEnabled ?? false);
       setAppreciationDelayMonths(data.settings.appreciationDelayMonths ?? 3);
     } catch {
@@ -79,7 +83,12 @@ const Settings = () => {
   const handleSaveReminder = async () => {
     try {
       setSavingReminder(true);
-      await api.patch('/settings', { reminderEnabled, reminderDay });
+      await api.patch('/settings', {
+        reminderEnabled,
+        reminderDay,
+        emailNotifications,
+        smsNotifications
+      });
       toast.success('Reminder settings saved');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to save settings');
@@ -168,6 +177,23 @@ const Settings = () => {
                   disabled={!isSuper}
                 />
 
+                <div className={`space-y-3 ${!reminderEnabled ? 'opacity-40 pointer-events-none' : ''}`}>
+                  <Toggle
+                    label="Send reminder emails"
+                    description="Members with an email address receive the full reminder message by email."
+                    enabled={emailNotifications}
+                    onChange={setEmailNotifications}
+                    disabled={!isSuper}
+                  />
+                  <Toggle
+                    label="Send reminder SMS"
+                    description="Members with a phone number on file receive a short SMS reminder."
+                    enabled={smsNotifications}
+                    onChange={setSmsNotifications}
+                    disabled={!isSuper}
+                  />
+                </div>
+
                 {/* Day picker */}
                 <div className={`space-y-2 transition-opacity ${!reminderEnabled ? 'opacity-40 pointer-events-none' : ''}`}>
                   <label className="block text-sm font-medium text-slate-700">
@@ -204,7 +230,7 @@ const Settings = () => {
                       <p className="text-sm font-medium text-blue-800">Next scheduled run</p>
                       <p className="text-sm text-blue-600 mt-0.5">
                         The {ordinalSuffix(reminderDay)} of every month at 08:00.
-                        Members with unpaid dues who have an email on file will be notified.
+                        Members with unpaid dues who have an email and/or phone on file will be notified (per your toggles above).
                       </p>
                     </div>
                   </div>
