@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
-import AppLogo from './AppLogo.jsx';
+
+const LOGO_SRC = '/brand/duesaccountant-logo.png';
 
 const MarketingFooter = () => {
   return (
@@ -10,8 +11,17 @@ const MarketingFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
-            <Link to="/" className="inline-block rounded-lg bg-white/95 p-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              <AppLogo className="max-w-[220px]" imgClassName="max-h-10" />
+            <Link
+              to="/"
+              className="mb-5 inline-block rounded-xl outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
+              aria-label="DuesAccountant — Home"
+            >
+              <img
+                src={LOGO_SRC}
+                alt="DuesAccountant — Dues Management Made Easy"
+                className="h-auto w-auto max-h-[68px] max-w-[300px] object-contain object-left select-none"
+                decoding="async"
+              />
             </Link>
             <p className="text-gray-400 mb-4">
               Streamline your organization's dues management with powerful analytics and automation.
@@ -32,12 +42,18 @@ const MarketingFooter = () => {
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-1">
               <li>
-                <Link to="/login" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
+                <Link
+                  to="/login"
+                  className="inline-flex min-h-[44px] items-center py-2 font-semibold text-gray-100 hover:text-white transition-colors"
+                >
                   Login
                 </Link>
               </li>
               <li>
-                <Link to="/register" className="inline-flex min-h-[44px] items-center py-2 hover:text-white transition-colors">
+                <Link
+                  to="/register"
+                  className="inline-flex min-h-[44px] items-center py-2 text-gray-300 hover:text-white transition-colors"
+                >
                   Register Organization
                 </Link>
               </li>

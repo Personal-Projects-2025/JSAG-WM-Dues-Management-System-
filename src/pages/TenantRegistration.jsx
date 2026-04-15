@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import api from '../services/api.js';
-import AppLogo from '../components/AppLogo.jsx';
+import AuthLightShell from '../components/AuthLightShell.jsx';
+import AuthBrandLogo from '../components/AuthBrandLogo.jsx';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -46,8 +47,8 @@ const inputCls =
   'focus:border-transparent transition';
 
 const primaryBtn =
-  'w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white ' +
-  'font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+  'w-full py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white ' +
+  'font-semibold rounded-xl shadow-lg shadow-cyan-600/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
 
 const secondaryBtn =
   'py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors';
@@ -294,13 +295,10 @@ const TenantRegistration = () => {
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6">
-          <div className="flex justify-center">
-            <Link to="/" className="inline-flex rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-              <AppLogo />
-            </Link>
-          </div>
+      <AuthLightShell>
+        <div className="mx-auto w-full max-w-md px-0">
+          <div className="overflow-hidden rounded-2xl border border-white/60 bg-white/95 p-8 text-center shadow-[0_20px_70px_-20px_rgba(15,118,168,0.18)] backdrop-blur-sm space-y-6">
+          <AuthBrandLogo />
           <div className="flex justify-center">
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
               <CheckCircle2 className="text-emerald-600" size={36} />
@@ -326,31 +324,30 @@ const TenantRegistration = () => {
 
           <Link
             to="/login"
-            className="block w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+            className={`block ${primaryBtn} text-center`}
           >
             Go to Sign In
           </Link>
         </div>
-      </div>
+        </div>
+      </AuthLightShell>
     );
   }
 
   // ── Registration form ───────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
-      <div className="max-w-lg w-full">
+    <AuthLightShell>
+      <div className="mx-auto w-full max-w-lg px-0 py-0">
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg">
-            <AppLogo />
-          </Link>
-          <p className="mt-2 text-slate-500 text-sm">Register your organization to get started</p>
+        <div className="mb-8 text-center">
+          <AuthBrandLogo />
+          <p className="mt-4 text-sm text-slate-600">Register your organization to get started</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-8">
+        <div className="space-y-8 overflow-hidden rounded-2xl border border-white/60 bg-white/95 p-6 shadow-[0_20px_70px_-20px_rgba(15,118,168,0.18)] backdrop-blur-sm sm:p-8">
 
           {/* Step indicator */}
           <div className="flex items-center">
@@ -643,15 +640,15 @@ const TenantRegistration = () => {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="mt-6 text-center text-sm text-slate-500">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/login" className="font-semibold text-blue-800 hover:underline">
             Sign in
           </Link>
         </p>
 
       </div>
-    </div>
+    </AuthLightShell>
   );
 };
 
