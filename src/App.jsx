@@ -32,6 +32,7 @@ const SystemSettings = lazy(() => import('./pages/SystemSettings.jsx'));
 const TenantApproval = lazy(() => import('./pages/TenantApproval.jsx'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
+const ReceiptPublicRedirect = lazy(() => import('./pages/ReceiptPublicRedirect.jsx'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -56,6 +57,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/r/:token" element={<ReceiptPublicRedirect />} />
           <Route
             path="/dashboard"
             element={
