@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Sparkles } from 'lucide-react';
+import AppLogo from '../components/AppLogo.jsx';
+import AuthPageShell from '../components/AuthPageShell.jsx';
+
+const inputClass =
+  'block w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-sm text-white ' +
+  'placeholder:text-slate-500 shadow-inner transition focus:border-fuchsia-400/50 focus:outline-none ' +
+  'focus:ring-2 focus:ring-fuchsia-500/30';
 
 const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -28,7 +35,6 @@ const Login = () => {
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      // Redirect authenticated users to their dashboard
       if (user?.role === 'system') {
         navigate('/multi-admin', { replace: true });
       } else {
@@ -44,8 +50,7 @@ const Login = () => {
     try {
       const data = await login(usernameOrEmail, password);
       toast.success('Login successful!');
-      
-      // Route System Users to Multi-Admin Dashboard
+
       if (data.user?.role === 'system' || data.isSystemUser) {
         navigate('/multi-admin');
       } else {
@@ -60,93 +65,113 @@ const Login = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <AuthPageShell>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-white/20 border-t-fuchsia-400" />
+          <p className="text-sm text-slate-400">Loading…</p>
+        </div>
+      </AuthPageShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="max-w-md w-full space-y-8 p-4 sm:p-8 bg-white rounded-lg shadow-md">
-        <div>
-          <Link to="/" className="block text-center mb-4">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors">
-              Dues Accountant
-            </h2>
-          </Link>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="usernameOrEmail" className="sr-only">
-                Username or Email
-              </label>
-              <input
-                id="usernameOrEmail"
-                name="usernameOrEmail"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Username or Email"
-                value={usernameOrEmail}
-                onChange={(e) => setUsernameOrEmail(e.target.value)}
-              />
-            </div>
-            <div className="relative">
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none z-10"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center min-h-[44px] items-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-          <div className="text-center space-y-2">
+    <AuthPageShell>
+      <div className="w-full max-w-md">
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] p-8 shadow-[0_0_80px_-20px_rgba(217,70,239,0.35)] backdrop-blur-2xl sm:p-10">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-fuchsia-500/30 to-transparent blur-2xl" />
+          <div className="relative">
             <Link
-              to="/forgot-password"
-              className="block py-1 text-sm text-blue-600 hover:text-blue-500 font-medium"
+              to="/"
+              className="mb-6 flex justify-center outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400/60 rounded-2xl"
             >
-              Forgot your password?
+              <AppLogo />
             </Link>
-            <Link to="/register" className="block py-2 text-sm text-blue-600 hover:text-blue-500">
-              Don't have an account? Register your organization
-            </Link>
-            <Link to="/" className="block py-2 text-sm text-gray-500 hover:text-gray-700">
-              ← Back to Home
-            </Link>
+            <div className="mb-8 text-center">
+              <h1 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-[2rem]">
+                Welcome back
+              </h1>
+              <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-slate-400">
+                <Sparkles className="h-3.5 w-3.5 text-fuchsia-400" aria-hidden />
+                Sign in and pick up where you left off
+              </p>
+            </div>
+
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <div className="space-y-3">
+                <label htmlFor="usernameOrEmail" className="sr-only">
+                  Username or Email
+                </label>
+                <input
+                  id="usernameOrEmail"
+                  name="usernameOrEmail"
+                  type="text"
+                  required
+                  autoComplete="username"
+                  className={`${inputClass} rounded-2xl`}
+                  placeholder="Username or email"
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
+                />
+                <div className="relative">
+                  <label htmlFor="password" className="sr-only">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    className={`${inputClass} rounded-2xl pr-12`}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 transition-colors hover:text-white focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 py-3.5 text-sm font-bold tracking-wide text-white shadow-lg shadow-fuchsia-500/25 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="relative z-10">{loading ? 'Signing you in…' : 'Let’s go'}</span>
+              </button>
+
+              <div className="space-y-3 pt-1 text-center text-sm">
+                <Link
+                  to="/forgot-password"
+                  className="block font-medium text-fuchsia-300/90 transition hover:text-white"
+                >
+                  Forgot your password?
+                </Link>
+                <Link
+                  to="/register"
+                  className="block py-1 text-slate-400 transition hover:text-cyan-300"
+                >
+                  New here? <span className="font-semibold text-white">Create your org</span>
+                </Link>
+                <Link
+                  to="/"
+                  className="mt-2 inline-block text-xs text-slate-500 transition hover:text-slate-300"
+                >
+                  ← Back to home
+                </Link>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </AuthPageShell>
   );
 };
 
 export default Login;
-

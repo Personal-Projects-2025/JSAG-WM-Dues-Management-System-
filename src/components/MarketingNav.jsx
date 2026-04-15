@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import AppLogo from './AppLogo.jsx';
 
 const MarketingNav = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,8 +19,8 @@ const MarketingNav = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              Dues Accountant
+            <Link to="/" className="inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md">
+              <AppLogo className="justify-center" />
             </Link>
           </div>
           

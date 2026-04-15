@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import api from '../services/api.js';
+import AppLogo from '../components/AppLogo.jsx';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -296,6 +297,11 @@ const TenantRegistration = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6">
           <div className="flex justify-center">
+            <Link to="/" className="inline-flex rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+              <AppLogo />
+            </Link>
+          </div>
+          <div className="flex justify-center">
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
               <CheckCircle2 className="text-emerald-600" size={36} />
             </div>
@@ -337,10 +343,8 @@ const TenantRegistration = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-3xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors">
-              Dues Accountant
-            </h1>
+          <Link to="/" className="inline-flex justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg">
+            <AppLogo />
           </Link>
           <p className="mt-2 text-slate-500 text-sm">Register your organization to get started</p>
         </div>

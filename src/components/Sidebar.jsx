@@ -1,16 +1,22 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { ChevronsLeft, ChevronsRight, X } from 'lucide-react';
 import clsx from 'clsx';
+import AppLogo from './AppLogo.jsx';
+import { useTenantBranding } from './TenantBranding.jsx';
 
 const Sidebar = ({
   navItems,
   isCollapsed,
   onCollapseToggle,
   isMobileOpen,
-  onMobileClose
+  onMobileClose,
+  user
 }) => {
+  const { tenantLogoUrl, sidebarBrandLabel } = useTenantBranding();
   const expandedWidth = 232; // ~14.5rem
+  const homePath =
+    user?.role === 'system' ? '/multi-admin' : '/dashboard';
 
   return (
     <>
@@ -33,14 +39,23 @@ const Sidebar = ({
         aria-label="Main navigation"
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white text-[13px] font-semibold">
-              GD
-            </div>
+          <Link
+            to={homePath}
+            className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-md pr-1 outline-none ring-blue-500 focus-visible:ring-2"
+            onClick={onMobileClose}
+          >
+            <AppLogo
+              logoSrc={tenantLogoUrl}
+              variant="sidebar"
+              compact={isCollapsed}
+              className="min-w-0 shrink"
+            />
             {!isCollapsed && (
-              <span className="text-sm font-semibold tracking-tight text-slate-900">Dues Accountant</span>
+              <span className="truncate text-sm font-semibold tracking-tight text-slate-900">
+                {sidebarBrandLabel}
+              </span>
             )}
-          </div>
+          </Link>
           <button
             type="button"
             className="inline-flex h-11 min-w-[44px] items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 lg:hidden"

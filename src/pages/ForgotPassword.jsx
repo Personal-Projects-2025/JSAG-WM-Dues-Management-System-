@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle2, Loader2, Zap } from 'lucide-react';
 import { authService } from '../services/authService.js';
+import AppLogo from '../components/AppLogo.jsx';
+import AuthPageShell from '../components/AuthPageShell.jsx';
+
+const fieldClass =
+  'w-full rounded-2xl border border-white/15 bg-white/5 pl-11 pr-4 py-3.5 text-sm text-white ' +
+  'placeholder:text-slate-500 shadow-inner transition focus:border-fuchsia-400/50 focus:outline-none ' +
+  'focus:ring-2 focus:ring-fuchsia-500/30';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -24,56 +31,69 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4">
-      <div className="max-w-md w-full">
-        {/* Back link */}
+    <AuthPageShell>
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex justify-center">
+          <Link
+            to="/"
+            className="inline-flex rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400/60"
+          >
+            <AppLogo />
+          </Link>
+        </div>
+
         <Link
           to="/login"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-6 group"
+          className="group mb-6 inline-flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-fuchsia-300"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Back to Sign In
+          <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-0.5" />
+          Back to sign in
         </Link>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-8 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 rounded-full mb-4">
-              <Mail className="w-7 h-7 text-white" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] shadow-[0_0_80px_-20px_rgba(34,211,238,0.25)] backdrop-blur-2xl">
+          <div className="relative border-b border-white/10 bg-gradient-to-r from-fuchsia-600/40 via-violet-600/30 to-cyan-500/30 px-8 py-8 text-center">
+            <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+              <Mail className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Forgot Password?</h1>
-            <p className="text-blue-100 text-sm mt-1">No worries — we'll send you a reset code</p>
+            <h1 className="font-display text-2xl font-extrabold tracking-tight text-white">
+              Reset link incoming
+            </h1>
+            <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm text-slate-300">
+              <Zap className="h-3.5 w-3.5 text-cyan-300" aria-hidden />
+              We&apos;ll email you a 6-digit code
+            </p>
           </div>
 
           <div className="px-8 py-8">
             {!sent ? (
               <>
-                <p className="text-gray-600 text-sm mb-6 text-center">
-                  Enter the email address linked to your account and we'll send you a 6-digit code to reset your password.
+                <p className="mb-6 text-center text-sm leading-relaxed text-slate-400">
+                  Drop the email on your account. If it&apos;s registered, you&apos;ll get a code to set a new password.
                 </p>
 
                 {error && (
-                  <div className="mb-5 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  <div className="mb-5 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
                     {error}
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Email Address
+                    <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Email
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                       <input
                         id="email"
                         type="email"
                         required
                         autoFocus
+                        autoComplete="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                        className={fieldClass}
                       />
                     </div>
                   </div>
@@ -81,41 +101,43 @@ const ForgotPassword = () => {
                   <button
                     type="submit"
                     disabled={loading || !email.trim()}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 py-3.5 text-sm font-bold tracking-wide text-white shadow-lg shadow-fuchsia-500/25 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending Code...
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Sending…
                       </>
                     ) : (
-                      'Send Reset Code'
+                      'Send reset code'
                     )}
                   </button>
                 </form>
               </>
             ) : (
-              <div className="text-center py-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-5">
-                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <div className="py-2 text-center">
+                <div className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 ring-1 ring-emerald-400/40">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-300" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-2">Check your inbox</h2>
-                <p className="text-sm text-gray-600 mb-2">
-                  If <span className="font-medium text-gray-800">{email}</span> is registered, a 6-digit reset code has been sent.
+                <h2 className="font-display text-lg font-bold text-white">Check your inbox</h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  If <span className="font-medium text-slate-200">{email}</span> is on file, a 6-digit code is headed your way.
                 </p>
-                <p className="text-xs text-gray-500 mb-8">
-                  The code expires in 15 minutes. Check your spam folder if you don't see it.
-                </p>
+                <p className="mt-2 text-xs text-slate-500">Expires in 15 min — peek spam if needed.</p>
                 <Link
                   to="/reset-password"
                   state={{ email }}
-                  className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="mt-8 flex w-full items-center justify-center rounded-full bg-white/10 py-3.5 text-sm font-bold text-white ring-1 ring-white/20 transition hover:bg-white/15"
                 >
-                  Enter Reset Code →
+                  Enter code →
                 </Link>
                 <button
-                  onClick={() => { setSent(false); setEmail(''); }}
-                  className="mt-3 text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                  type="button"
+                  onClick={() => {
+                    setSent(false);
+                    setEmail('');
+                  }}
+                  className="mt-4 text-sm text-slate-500 transition hover:text-fuchsia-300"
                 >
                   Use a different email
                 </button>
@@ -124,14 +146,14 @@ const ForgotPassword = () => {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Remember your password?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">
-            Sign In
+        <p className="mt-8 text-center text-xs text-slate-500">
+          Remembered it?{' '}
+          <Link to="/login" className="font-semibold text-fuchsia-300/90 hover:text-white">
+            Sign in
           </Link>
         </p>
       </div>
-    </div>
+    </AuthPageShell>
   );
 };
 

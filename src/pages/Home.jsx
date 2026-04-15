@@ -121,7 +121,7 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Secure & Private</h3>
               <p className="text-gray-600">
-                Multi-tenant architecture ensures your data is isolated and secure.
+                Your organization’s information is protected with strong security practices and kept separate from everyone else’s.
               </p>
             </div>
           </div>
@@ -264,8 +264,7 @@ const Home = () => {
                 Is my data secure?
               </h3>
               <p className="text-gray-600">
-                Yes! We use a multi-tenant architecture where each organization's data is 
-                completely isolated in its own database. Your data is private and secure.
+                Yes. Your organization’s data is stored separately and protected with industry-standard security. It stays yours—private and secure.
               </p>
             </div>
 

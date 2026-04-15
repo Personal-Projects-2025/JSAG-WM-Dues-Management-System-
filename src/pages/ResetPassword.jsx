@@ -1,10 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { KeyRound, ArrowLeft, Eye, EyeOff, CheckCircle2, Loader2, Mail } from 'lucide-react';
+import { KeyRound, ArrowLeft, Eye, EyeOff, CheckCircle2, Loader2, Mail, Sparkles } from 'lucide-react';
 import { authService } from '../services/authService.js';
 import { toast } from 'react-toastify';
+import AppLogo from '../components/AppLogo.jsx';
+import AuthPageShell from '../components/AuthPageShell.jsx';
 
 const OTP_LENGTH = 6;
+
+const fieldClass =
+  'w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-sm text-white ' +
+  'placeholder:text-slate-500 shadow-inner transition focus:border-fuchsia-400/50 focus:outline-none ' +
+  'focus:ring-2 focus:ring-fuchsia-500/30';
+
+const otpBoxBase =
+  'h-12 w-10 sm:w-11 text-center text-lg font-bold rounded-xl border-2 bg-white/5 transition-all ' +
+  'focus:outline-none focus:ring-0 sm:h-14 sm:text-xl';
 
 const ResetPassword = () => {
   const location = useLocation();
@@ -57,7 +68,9 @@ const ResetPassword = () => {
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
     if (!pasted) return;
     const updated = Array(OTP_LENGTH).fill('');
-    pasted.split('').forEach((ch, i) => { updated[i] = ch; });
+    pasted.split('').forEach((ch, i) => {
+      updated[i] = ch;
+    });
     setOtp(updated);
     const nextIndex = Math.min(pasted.length, OTP_LENGTH - 1);
     otpRefs.current[nextIndex]?.focus();
@@ -69,9 +82,9 @@ const ResetPassword = () => {
   const passwordStrength = (pwd) => {
     if (!pwd) return null;
     if (pwd.length < 6) return { level: 'weak', label: 'Too short', color: 'bg-red-400', width: 'w-1/4' };
-    if (pwd.length < 8) return { level: 'fair', label: 'Fair', color: 'bg-yellow-400', width: 'w-2/4' };
-    if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) return { level: 'strong', label: 'Strong', color: 'bg-green-500', width: 'w-full' };
-    return { level: 'good', label: 'Good', color: 'bg-blue-400', width: 'w-3/4' };
+    if (pwd.length < 8) return { level: 'fair', label: 'Fair', color: 'bg-amber-400', width: 'w-2/4' };
+    if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) return { level: 'strong', label: 'Strong', color: 'bg-emerald-400', width: 'w-full' };
+    return { level: 'good', label: 'Good', color: 'bg-cyan-400', width: 'w-3/4' };
   };
 
   const strength = passwordStrength(newPassword);
@@ -80,9 +93,18 @@ const ResetPassword = () => {
     e.preventDefault();
     setError('');
 
-    if (!isOtpComplete) { setError('Please enter the complete 6-digit code.'); return; }
-    if (newPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
-    if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
+    if (!isOtpComplete) {
+      setError('Please enter the complete 6-digit code.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -103,86 +125,101 @@ const ResetPassword = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-10 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
+      <AuthPageShell>
+        <div className="w-full max-w-md">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] p-10 text-center shadow-[0_0_80px_-20px_rgba(52,211,153,0.35)] backdrop-blur-2xl">
+            <div className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 ring-1 ring-emerald-400/40">
+              <CheckCircle2 className="h-10 w-10 text-emerald-300" />
+            </div>
+            <h1 className="font-display text-2xl font-extrabold text-white">You&apos;re all set</h1>
+            <p className="mt-2 text-sm text-slate-400">
+              New password locked in. Sign in whenever you&apos;re ready.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="mt-8 w-full rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 py-3.5 text-sm font-bold text-white shadow-lg shadow-fuchsia-500/25 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            >
+              Sign in now
+            </button>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">All Done!</h1>
-          <p className="text-gray-500 text-sm mb-8">
-            Your password has been reset successfully. You can now sign in with your new password.
-          </p>
-          <button
-            onClick={() => navigate('/login')}
-            className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Sign In Now
-          </button>
         </div>
-      </div>
+      </AuthPageShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4">
-      <div className="max-w-md w-full">
-        {/* Back link */}
+    <AuthPageShell>
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex justify-center">
+          <Link
+            to="/"
+            className="inline-flex rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400/60"
+          >
+            <AppLogo />
+          </Link>
+        </div>
         <Link
           to="/forgot-password"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-6 group"
+          className="group mb-6 inline-flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-fuchsia-300"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-0.5" />
           Back
         </Link>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-8 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 rounded-full mb-4">
-              <KeyRound className="w-7 h-7 text-white" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] shadow-[0_0_80px_-20px_rgba(168,85,247,0.3)] backdrop-blur-2xl">
+          <div className="relative border-b border-white/10 bg-gradient-to-r from-violet-600/40 via-fuchsia-600/30 to-cyan-500/30 px-8 py-8 text-center">
+            <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+              <KeyRound className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Reset Password</h1>
-            <p className="text-blue-100 text-sm mt-1">Enter your code and choose a new password</p>
+            <h1 className="font-display text-2xl font-extrabold tracking-tight text-white">
+              New password
+            </h1>
+            <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm text-slate-300">
+              <Sparkles className="h-3.5 w-3.5 text-fuchsia-300" aria-hidden />
+              Code + fresh password = done
+            </p>
           </div>
 
-          <div className="px-8 py-8">
+          <div className="px-6 py-8 sm:px-8">
             {error && (
-              <div className="mb-5 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div className="mb-5 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
               <div>
-                <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email Address
+                <label htmlFor="reset-email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   <input
                     id="reset-email"
                     type="email"
                     required
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                    className={`${fieldClass} pl-11`}
                   />
                 </div>
               </div>
 
-              {/* OTP boxes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  6-Digit Reset Code
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  6-digit code
                 </label>
-                <p className="text-xs text-gray-400 mb-3">Check your email for the code we sent you.</p>
-                <div className="flex gap-2 justify-between" onPaste={handleOtpPaste}>
+                <p className="mb-3 text-xs text-slate-500">From your email (paste works too).</p>
+                <div className="flex justify-between gap-1.5 sm:gap-2" onPaste={handleOtpPaste}>
                   {otp.map((digit, i) => (
                     <input
                       key={i}
-                      ref={(el) => (otpRefs.current[i] = el)}
+                      ref={(el) => {
+                        otpRefs.current[i] = el;
+                      }}
                       type="text"
                       inputMode="numeric"
                       maxLength={1}
@@ -190,27 +227,25 @@ const ResetPassword = () => {
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
                       className={`
-                        w-11 h-12 text-center text-xl font-bold rounded-lg border-2 transition-all
-                        focus:outline-none focus:ring-0
+                        ${otpBoxBase}
                         ${digit
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-gray-50 text-gray-900 focus:border-blue-400'}
+                          ? 'border-fuchsia-400/70 bg-fuchsia-500/10 text-fuchsia-100'
+                          : 'border-white/15 text-white focus:border-fuchsia-400/50'}
                       `}
                       aria-label={`Digit ${i + 1}`}
                     />
                   ))}
                 </div>
                 {isOtpComplete && (
-                  <p className="mt-1.5 text-xs text-green-600 font-medium flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Code entered
+                  <p className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-300">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Code entered
                   </p>
                 )}
               </div>
 
-              {/* New password */}
               <div>
-                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  New Password
+                <label htmlFor="new-password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  New password
                 </label>
                 <div className="relative">
                   <input
@@ -218,71 +253,79 @@ const ResetPassword = () => {
                     type={showNew ? 'text' : 'password'}
                     required
                     minLength={6}
+                    autoComplete="new-password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="At least 6 characters"
-                    className="w-full px-4 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                    className={`${fieldClass} pr-12`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowNew((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 transition-colors hover:text-white"
                     aria-label={showNew ? 'Hide password' : 'Show password'}
                   >
-                    {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {/* Strength bar */}
                 {strength && (
                   <div className="mt-2">
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
                       <div className={`h-full rounded-full transition-all duration-300 ${strength.color} ${strength.width}`} />
                     </div>
-                    <p className={`text-xs mt-1 font-medium ${
-                      strength.level === 'weak' ? 'text-red-500' :
-                      strength.level === 'fair' ? 'text-yellow-600' :
-                      strength.level === 'good' ? 'text-blue-500' : 'text-green-600'
-                    }`}>{strength.label}</p>
+                    <p
+                      className={`mt-1 text-xs font-medium ${
+                        strength.level === 'weak'
+                          ? 'text-red-400'
+                          : strength.level === 'fair'
+                            ? 'text-amber-400'
+                            : strength.level === 'good'
+                              ? 'text-cyan-400'
+                              : 'text-emerald-400'
+                      }`}
+                    >
+                      {strength.label}
+                    </p>
                   </div>
                 )}
               </div>
 
-              {/* Confirm password */}
               <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Confirm New Password
+                <label htmlFor="confirm-password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Confirm
                 </label>
                 <div className="relative">
                   <input
                     id="confirm-password"
                     type={showConfirm ? 'text' : 'password'}
                     required
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repeat your new password"
-                    className={`w-full px-4 pr-10 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-shadow ${
+                    placeholder="Repeat password"
+                    className={`${fieldClass} pr-12 ${
                       confirmPassword && newPassword !== confirmPassword
-                        ? 'border-red-300 focus:ring-red-400 bg-red-50'
+                        ? 'border-red-400/40 bg-red-500/5'
                         : confirmPassword && newPassword === confirmPassword
-                        ? 'border-green-300 focus:ring-green-400 bg-green-50'
-                        : 'border-gray-300 focus:ring-blue-500'
+                          ? 'border-emerald-400/40 bg-emerald-500/10'
+                          : ''
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 transition-colors hover:text-white"
                     aria-label={showConfirm ? 'Hide password' : 'Show password'}
                   >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
-                  <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
+                  <p className="mt-1 text-xs text-red-400">Doesn&apos;t match yet</p>
                 )}
                 {confirmPassword && newPassword === confirmPassword && (
-                  <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Passwords match
+                  <p className="mt-1 flex items-center gap-1 text-xs text-emerald-300">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Match
                   </p>
                 )}
               </div>
@@ -290,38 +333,35 @@ const ResetPassword = () => {
               <button
                 type="submit"
                 disabled={loading || !isOtpComplete || !newPassword || !confirmPassword}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 py-3.5 text-sm font-bold tracking-wide text-white shadow-lg shadow-fuchsia-500/25 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Resetting Password...
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Updating…
                   </>
                 ) : (
-                  'Reset Password'
+                  'Save new password'
                 )}
               </button>
             </form>
 
             <div className="mt-5 text-center">
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Didn't receive a code? Resend
+              <Link to="/forgot-password" className="text-sm font-medium text-fuchsia-300/90 hover:text-white">
+                Need a new code?
               </Link>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Remember your password?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">
-            Sign In
+        <p className="mt-8 text-center text-xs text-slate-500">
+          Remembered it?{' '}
+          <Link to="/login" className="font-semibold text-fuchsia-300/90 hover:text-white">
+            Sign in
           </Link>
         </p>
       </div>
-    </div>
+    </AuthPageShell>
   );
 };
 

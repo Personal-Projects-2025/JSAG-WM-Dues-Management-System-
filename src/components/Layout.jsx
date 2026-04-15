@@ -93,6 +93,7 @@ const Layout = ({ children }) => {
         onCollapseToggle={toggleSidebarCollapse}
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
+        user={user}
       />
 
       <div

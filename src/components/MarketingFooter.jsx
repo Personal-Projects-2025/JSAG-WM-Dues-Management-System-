@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
+import AppLogo from './AppLogo.jsx';
 
 const MarketingFooter = () => {
   return (
@@ -9,7 +10,9 @@ const MarketingFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold text-white mb-4">Dues Accountant</h3>
+            <Link to="/" className="inline-block rounded-lg bg-white/95 p-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+              <AppLogo className="max-w-[220px]" imgClassName="max-h-10" />
+            </Link>
             <p className="text-gray-400 mb-4">
               Streamline your organization's dues management with powerful analytics and automation.
             </p>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import AppLogo from '../components/AppLogo.jsx';
 
 /**
  * Short URL: /r/:token → redirects to API public PDF (same receipt as SMS link).
@@ -20,7 +21,8 @@ const ReceiptPublicRedirect = () => {
   }, [token]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-slate-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50 px-4">
+      <AppLogo className="opacity-90" />
       <Loader2 className="w-8 h-8 animate-spin text-blue-600" aria-hidden />
       <p className="text-sm text-slate-600 text-center">Opening your receipt…</p>
       {!process.env.REACT_APP_API_URL && (
