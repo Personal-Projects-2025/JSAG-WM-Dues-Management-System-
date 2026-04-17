@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Loader2, Mail, KeyRound } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Loader2, Mail } from 'lucide-react';
 import { authService } from '../services/authService.js';
 import { toast } from 'react-toastify';
 import AuthLightShell from '../components/AuthLightShell.jsx';
