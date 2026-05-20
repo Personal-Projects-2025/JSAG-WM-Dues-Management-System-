@@ -120,7 +120,11 @@ const Settings = () => {
       setShowUserModal(false);
       setUserForm({ username: '', email: '', password: '', role: 'admin' });
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to create user');
+      const data = err.response?.data;
+      const detailMsg = Array.isArray(data?.details) && data.details.length > 0
+        ? data.details.map((d) => d.msg || d.message).filter(Boolean).join(' • ')
+        : null;
+      toast.error(detailMsg || data?.error || 'Failed to create user');
     } finally {
       setCreatingUser(false);
     }
