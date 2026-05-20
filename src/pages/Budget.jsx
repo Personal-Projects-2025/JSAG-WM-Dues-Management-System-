@@ -18,6 +18,7 @@ import {
   ArrowUpCircle
 } from 'lucide-react';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const formatCurrency = (value) =>
   typeof value === 'number'
@@ -59,8 +60,8 @@ const Budget = () => {
       setLoading(true);
       const res = await api.get('/budgets');
       setBudgets(res.data || []);
-    } catch {
-      toast.error('Failed to load budgets');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Failed to load budgets'));
     } finally {
       setLoading(false);
     }
@@ -87,8 +88,8 @@ const Budget = () => {
       try {
         const res = await api.get(`/budgets/${selectedId}/summary`);
         setSummary(res.data);
-      } catch {
-        toast.error('Failed to load budget summary');
+      } catch (err) {
+        toast.error(getApiErrorMessage(err, 'Failed to load budget summary'));
         setSummary(null);
       } finally {
         setSummaryLoading(false);
@@ -153,7 +154,7 @@ const Budget = () => {
       }
       setFormOpen(false);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Operation failed');
+      toast.error(getApiErrorMessage(err, 'Operation failed'));
     } finally {
       setSubmitting(false);
     }
@@ -168,8 +169,8 @@ const Budget = () => {
       setDeleteTarget(null);
       if (selectedId === id) setSelectedId(null);
       await fetchBudgets();
-    } catch {
-      toast.error('Failed to delete budget');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Failed to delete budget'));
     }
   };
 

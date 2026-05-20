@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -67,8 +68,8 @@ const TenantManagement = () => {
     try {
       const response = await api.get('/tenants');
       setTenants(response.data);
-    } catch {
-      toast.error('Failed to fetch tenants');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Failed to fetch tenants'));
     } finally {
       setLoading(false);
     }
@@ -83,8 +84,8 @@ const TenantManagement = () => {
     try {
       const res = await api.get(`/system/tenant-users/${tenantId}`);
       setTenantUsers(p => ({ ...p, [tenantId]: res.data }));
-    } catch {
-      toast.error('Failed to load users for this tenant');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Failed to load users for this tenant'));
     } finally {
       setUsersLoading(p => ({ ...p, [tenantId]: false }));
     }
@@ -98,7 +99,7 @@ const TenantManagement = () => {
       toast.success('Status updated');
       fetchTenants();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update status');
+      toast.error(getApiErrorMessage(err, 'Failed to update status'));
     }
   };
 
@@ -109,7 +110,7 @@ const TenantManagement = () => {
       toast.success('Tenant archived');
       fetchTenants();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to archive tenant');
+      toast.error(getApiErrorMessage(err, 'Failed to archive tenant'));
     }
   };
 
@@ -119,7 +120,7 @@ const TenantManagement = () => {
       toast.success('Tenant restored');
       fetchTenants();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to restore tenant');
+      toast.error(getApiErrorMessage(err, 'Failed to restore tenant'));
     }
   };
 
@@ -140,7 +141,7 @@ const TenantManagement = () => {
       setSelectedTenant(null);
       fetchTenants();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update tenant');
+      toast.error(getApiErrorMessage(err, 'Failed to update tenant'));
     } finally {
       setEditSaving(false);
     }
@@ -176,7 +177,7 @@ const TenantManagement = () => {
         )
       }));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to update role');
+      toast.error(getApiErrorMessage(err, 'Failed to update role'));
     } finally {
       setRoleUpdating(p => ({ ...p, [userId]: false }));
     }

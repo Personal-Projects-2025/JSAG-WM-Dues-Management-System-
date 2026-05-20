@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const formatDateTime = (value) =>
   value
@@ -53,7 +54,7 @@ const ActivityLogs = () => {
       const response = await api.get(`/logs?${params.toString()}`);
       setLogs(response.data || []);
     } catch (error) {
-      toast.error('Failed to load activity logs');
+      toast.error(getApiErrorMessage(error, 'Failed to load activity logs'));
     } finally {
       setLoading(false);
     }
@@ -113,7 +114,7 @@ const ActivityLogs = () => {
       window.URL.revokeObjectURL(url);
       toast.success('Logs exported successfully');
     } catch (error) {
-      toast.error('Failed to export logs');
+      toast.error(getApiErrorMessage(error, 'Failed to export logs'));
     }
   };
 
@@ -123,7 +124,7 @@ const ActivityLogs = () => {
       toast.success('Log deleted successfully');
       fetchLogs();
     } catch (error) {
-      toast.error('Failed to delete log');
+      toast.error(getApiErrorMessage(error, 'Failed to delete log'));
     }
   }, [fetchLogs]);
 

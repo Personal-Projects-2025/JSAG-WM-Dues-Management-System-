@@ -19,6 +19,7 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const formatCurrency = (value) =>
   typeof value === 'number'
@@ -72,7 +73,7 @@ const Payments = () => {
       const response = await api.get('/contribution-types');
       setContributionTypes(response.data);
     } catch (error) {
-      toast.error('Failed to load contribution types');
+      toast.error(getApiErrorMessage(error, 'Failed to load contribution types'));
     }
   }, []);
 
@@ -81,7 +82,7 @@ const Payments = () => {
       const response = await api.get('/members');
       setMembers(response.data);
     } catch (error) {
-      toast.error('Failed to load members');
+      toast.error(getApiErrorMessage(error, 'Failed to load members'));
     }
   }, []);
 
@@ -96,7 +97,7 @@ const Payments = () => {
       const response = await api.get(`/contributions?${params.toString()}`);
       setContributions(response.data);
     } catch (error) {
-      toast.error('Failed to load contributions');
+      toast.error(getApiErrorMessage(error, 'Failed to load contributions'));
     } finally {
       setLoading(false);
     }
@@ -194,7 +195,7 @@ const Payments = () => {
       fetchReceipts();
       fetchContributionTypes();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to record contribution');
+      toast.error(getApiErrorMessage(error, 'Failed to record contribution'));
     } finally {
       setSubmitting(false);
     }
@@ -212,7 +213,7 @@ const Payments = () => {
       link.remove();
       toast.success('Receipt downloaded successfully');
     } catch (error) {
-      toast.error('Failed to download receipt');
+      toast.error(getApiErrorMessage(error, 'Failed to download receipt'));
     }
   };
 
@@ -222,7 +223,7 @@ const Payments = () => {
       await api.post(`/receipts/${receiptId}/resend`);
       toast.success('Receipt email sent successfully');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to send receipt email');
+      toast.error(getApiErrorMessage(error, 'Failed to send receipt email'));
     } finally {
       setResendingReceiptId(null);
     }
@@ -809,7 +810,7 @@ const ContributionTypesModal = ({ isOpen, onClose, contributionTypes, onRefresh 
       setDescription('');
       onRefresh();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to create type');
+      toast.error(getApiErrorMessage(error, 'Failed to create type'));
     } finally {
       setSubmitting(false);
     }
@@ -822,7 +823,7 @@ const ContributionTypesModal = ({ isOpen, onClose, contributionTypes, onRefresh 
       toast.success('Type deleted');
       onRefresh();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to delete');
+      toast.error(getApiErrorMessage(error, 'Failed to delete'));
     }
   };
 

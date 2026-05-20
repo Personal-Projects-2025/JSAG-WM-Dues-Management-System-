@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import { StatsCardSkeleton } from '../components/LoadingSkeleton.jsx';
 
 const Dashboard = () => {
@@ -56,7 +57,7 @@ const Dashboard = () => {
       setStats({ ...data, mergedMonthlyData });
       setReminderSummary(remindersResponse.data);
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      toast.error(getApiErrorMessage(error, 'Failed to load dashboard data'));
     } finally {
       setLoading(false);
     }

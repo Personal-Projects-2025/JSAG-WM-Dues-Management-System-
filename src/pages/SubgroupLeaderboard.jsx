@@ -25,6 +25,7 @@ import {
   Cell
 } from 'recharts';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const formatCurrency = (value) =>
   `GHS ${Number(value || 0).toLocaleString(undefined, {
@@ -50,7 +51,7 @@ const SubgroupLeaderboard = () => {
       const response = await api.get('/subgroups/leaderboard');
       setLeaderboard(response.data || []);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to load leaderboard');
+      toast.error(getApiErrorMessage(error, 'Failed to load leaderboard'));
     } finally {
       setLoading(false);
     }

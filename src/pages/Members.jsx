@@ -24,6 +24,7 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 /** Default join date in the add-member form (user can change before save). */
@@ -675,7 +676,7 @@ const Members = () => {
       const response = await api.get(`/members${query ? `?search=${query}` : ''}`);
       setMembers(response.data);
     } catch (error) {
-      toast.error('Failed to load members');
+      toast.error(getApiErrorMessage(error, 'Failed to load members'));
     } finally {
       setLoading(false);
     }
@@ -686,7 +687,7 @@ const Members = () => {
       const response = await api.get('/subgroups');
       setSubgroups(response.data);
     } catch (error) {
-      toast.error('Failed to load subgroups');
+      toast.error(getApiErrorMessage(error, 'Failed to load subgroups'));
     }
   }, []);
 
@@ -756,8 +757,7 @@ const Members = () => {
       resetForm();
       fetchMembers();
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.details?.[0]?.msg || 'Operation failed';
-      toast.error(errorMessage);
+      toast.error(getApiErrorMessage(error, 'Operation failed'));
       if (process.env.NODE_ENV === 'development') {
         console.error('Member operation error:', error.response?.data);
       }
@@ -811,8 +811,7 @@ const Members = () => {
         toast.warning(`${errs.length} row(s) failed: ${errs.map((e) => e.message).join('; ')}`);
       }
     } catch (error) {
-      const msg = error.response?.data?.error || 'Bulk add failed';
-      toast.error(msg);
+      toast.error(getApiErrorMessage(error, 'Bulk add failed'));
     } finally {
       setBulkSubmitting(false);
     }
@@ -849,8 +848,7 @@ const Members = () => {
         toast.warning(`${errs.length} row(s) failed: ${errs.map((e) => e.message).join('; ')}`);
       }
     } catch (error) {
-      const msg = error.response?.data?.error || 'Bulk add failed';
-      toast.error(msg);
+      toast.error(getApiErrorMessage(error, 'Bulk add failed'));
     } finally {
       setBulkSubmitting(false);
     }
@@ -868,7 +866,7 @@ const Members = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (error) {
-      toast.error('Failed to download template');
+      toast.error(getApiErrorMessage(error, 'Failed to download template'));
     }
   }, []);
 
@@ -881,7 +879,7 @@ const Members = () => {
       setDeleteConfirmOpen(false);
       setMemberToDelete(null);
     } catch (error) {
-      toast.error('Failed to delete member');
+      toast.error(getApiErrorMessage(error, 'Failed to delete member'));
     }
   }, [memberToDelete, fetchMembers]);
 

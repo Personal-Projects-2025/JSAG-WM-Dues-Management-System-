@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import AuthLightShell from '../components/AuthLightShell.jsx';
 import AuthBrandLogo from '../components/AuthBrandLogo.jsx';
 
@@ -183,7 +184,7 @@ const TenantRegistration = () => {
         if (data?.sessionId) setRegistrationSessionId(data.sessionId);
       } catch (err) {
         console.error(err);
-        toast.error('Could not start registration session. Refresh and try again.');
+        toast.error(getApiErrorMessage(err, 'Could not start registration session. Refresh and try again.'));
       }
     })();
   }, [step, registrationSessionId]);
@@ -201,7 +202,7 @@ const TenantRegistration = () => {
       });
       toast.success('Check your email for a verification code');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to send email code');
+      toast.error(getApiErrorMessage(error, 'Failed to send email code'));
     } finally {
       setOtpBusy(false);
     }
@@ -222,7 +223,7 @@ const TenantRegistration = () => {
       setEmailVerified(true);
       toast.success('Email verified');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Invalid code');
+      toast.error(getApiErrorMessage(error, 'Invalid email code'));
     } finally {
       setOtpBusy(false);
     }
@@ -245,7 +246,7 @@ const TenantRegistration = () => {
       });
       toast.success('Check your phone for an SMS code');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to send SMS');
+      toast.error(getApiErrorMessage(error, 'Failed to send SMS'));
     } finally {
       setOtpBusy(false);
     }
@@ -266,7 +267,7 @@ const TenantRegistration = () => {
       setPhoneVerified(true);
       toast.success('Phone verified');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Invalid code');
+      toast.error(getApiErrorMessage(error, 'Invalid SMS code'));
     } finally {
       setOtpBusy(false);
     }
@@ -285,7 +286,7 @@ const TenantRegistration = () => {
       });
       setDone(true);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Registration failed');
+      toast.error(getApiErrorMessage(error, 'Registration failed'));
     } finally {
       setLoading(false);
     }

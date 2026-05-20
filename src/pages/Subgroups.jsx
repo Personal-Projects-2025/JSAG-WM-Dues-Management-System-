@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import ConfirmationModal from '../components/ConfirmationModal.jsx';
 
 const formatCurrency = (value) =>
@@ -61,7 +62,7 @@ const Subgroups = () => {
       const response = await api.get('/subgroups');
       setSubgroups(response.data);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to load subgroups');
+      toast.error(getApiErrorMessage(error, 'Failed to load subgroups'));
     } finally {
       setLoading(false);
     }
@@ -82,7 +83,7 @@ const Subgroups = () => {
 
       setLeaders(leaders);
     } catch (error) {
-      toast.error('Failed to load eligible subgroup leaders');
+      toast.error(getApiErrorMessage(error, 'Failed to load eligible subgroup leaders'));
     }
   };
 
@@ -130,7 +131,7 @@ const Subgroups = () => {
       setDetailData(response.data);
       setDetailOpen(true);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to load subgroup details');
+      toast.error(getApiErrorMessage(error, 'Failed to load subgroup details'));
     }
   };
 
@@ -157,7 +158,7 @@ const Subgroups = () => {
       closeForm();
       fetchSubgroups();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to save subgroup');
+      toast.error(getApiErrorMessage(error, 'Failed to save subgroup'));
     } finally {
       setSaving(false);
     }
@@ -177,7 +178,7 @@ const Subgroups = () => {
       setDeleteConfirmOpen(false);
       setSubgroupToDelete(null);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to delete subgroup');
+      toast.error(getApiErrorMessage(error, 'Failed to delete subgroup'));
     }
   };
 

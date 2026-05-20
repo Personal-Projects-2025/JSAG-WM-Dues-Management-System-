@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Loader2, Mail } from 'lucide-react';
 import { authService } from '../services/authService.js';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import AuthLightShell from '../components/AuthLightShell.jsx';
 import AuthBrandLogo from '../components/AuthBrandLogo.jsx';
 
@@ -87,7 +88,7 @@ const ResetPassword = () => {
       setSuccess(true);
       toast.success('Password reset successfully!');
     } catch (err) {
-      const msg = err.response?.data?.error || 'Something went wrong. Please try again.';
+      const msg = getApiErrorMessage(err, 'Something went wrong. Please try again.');
       setError(msg);
       if (msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('invalid')) {
         setOtp(Array(OTP_LENGTH).fill(''));

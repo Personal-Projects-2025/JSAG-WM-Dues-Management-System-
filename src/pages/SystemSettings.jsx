@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import { Users, UserPlus, Shield } from 'lucide-react';
 
 const SystemSettings = () => {
@@ -37,7 +38,7 @@ const SystemSettings = () => {
       setSuperUsers(superRes.data);
       setTenants(tenantsRes.data.filter(t => t.status === 'active'));
     } catch (error) {
-      toast.error('Failed to fetch data');
+      toast.error(getApiErrorMessage(error, 'Failed to fetch data'));
     } finally {
       setLoading(false);
     }
@@ -87,7 +88,7 @@ const SystemSettings = () => {
       });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to create user');
+      toast.error(getApiErrorMessage(error, 'Failed to create user'));
     }
   };
 

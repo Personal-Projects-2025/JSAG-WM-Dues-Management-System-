@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import {
   Building2,
   Users,
@@ -50,7 +51,7 @@ const MultiAdminDashboard = () => {
         archivedTenants: archived
       });
     } catch (error) {
-      toast.error('Failed to fetch tenants');
+      toast.error(getApiErrorMessage(error, 'Failed to fetch tenants'));
     } finally {
       setLoading(false);
     }

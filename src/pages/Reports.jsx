@@ -11,6 +11,7 @@ import {
   Printer
 } from 'lucide-react';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const Reports = () => {
   const [reportType, setReportType] = useState('members');
@@ -50,7 +51,7 @@ const Reports = () => {
 
       toast.success('Report exported successfully');
     } catch (error) {
-      toast.error('Failed to export report');
+      toast.error(getApiErrorMessage(error, 'Failed to export report'));
     } finally {
       setLoading(false);
     }

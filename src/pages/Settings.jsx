@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api.js';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import {
   Bell,
   Users,
@@ -71,8 +72,8 @@ const Settings = () => {
       setSmsNotifications(data.settings.smsNotifications ?? true);
       setAppreciationEnabled(data.settings.appreciationEnabled ?? false);
       setAppreciationDelayMonths(data.settings.appreciationDelayMonths ?? 3);
-    } catch {
-      toast.error('Failed to load settings');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Failed to load settings'));
     } finally {
       setLoadingSettings(false);
     }
@@ -91,7 +92,7 @@ const Settings = () => {
       });
       toast.success('Reminder settings saved');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to save settings');
+      toast.error(getApiErrorMessage(err, 'Failed to save settings'));
     } finally {
       setSavingReminder(false);
     }
@@ -103,7 +104,7 @@ const Settings = () => {
       await api.patch('/settings', { appreciationEnabled, appreciationDelayMonths });
       toast.success('Appreciation settings saved');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to save settings');
+      toast.error(getApiErrorMessage(err, 'Failed to save settings'));
     } finally {
       setSavingAppreciation(false);
     }
@@ -120,11 +121,7 @@ const Settings = () => {
       setShowUserModal(false);
       setUserForm({ username: '', email: '', password: '', role: 'admin' });
     } catch (err) {
-      const data = err.response?.data;
-      const detailMsg = Array.isArray(data?.details) && data.details.length > 0
-        ? data.details.map((d) => d.msg || d.message).filter(Boolean).join(' • ')
-        : null;
-      toast.error(detailMsg || data?.error || 'Failed to create user');
+      toast.error(getApiErrorMessage(err, 'Failed to create user'));
     } finally {
       setCreatingUser(false);
     }
@@ -407,6 +404,9 @@ const Settings = () => {
                   className="input-base"
                   placeholder="e.g. john_doe"
                 />
+                <p className="text-xs text-slate-400 mt-1">
+                  3–50 characters. Letters, numbers, and underscores only (no spaces or dots).
+                </p>
               </Field>
               <Field label="Email *">
                 <input
@@ -439,6 +439,7 @@ const Settings = () => {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                <p className="text-xs text-slate-400 mt-1">At least 6 characters.</p>
               </Field>
               <Field label="Role *">
                 <select

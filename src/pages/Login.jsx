@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import AuthLightShell from '../components/AuthLightShell.jsx';
 import AuthBrandLogo from '../components/AuthBrandLogo.jsx';
 
@@ -42,7 +43,7 @@ const Login = () => {
       toast.success('Login successful!');
       navigate(data.user?.role === 'system' || data.isSystemUser ? '/multi-admin' : '/dashboard');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Login failed');
+      toast.error(getApiErrorMessage(error, 'Login failed'));
     } finally {
       setLoading(false);
     }

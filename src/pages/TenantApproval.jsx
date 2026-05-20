@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import { CheckCircle2, XCircle, Eye, Clock, AlertCircle } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -20,7 +21,7 @@ const TenantApproval = () => {
       const response = await api.get('/tenant-approval/pending');
       setPendingTenants(response.data);
     } catch (error) {
-      toast.error('Failed to load pending tenants');
+      toast.error(getApiErrorMessage(error, 'Failed to load pending tenants'));
     }
   }, []);
 
@@ -29,7 +30,7 @@ const TenantApproval = () => {
       const response = await api.get('/tenant-approval/rejected');
       setRejectedTenants(response.data);
     } catch (error) {
-      toast.error('Failed to load rejected tenants');
+      toast.error(getApiErrorMessage(error, 'Failed to load rejected tenants'));
     }
   }, []);
 
@@ -48,7 +49,7 @@ const TenantApproval = () => {
       setSelectedTenant(response.data);
       setDetailModalOpen(true);
     } catch (error) {
-      toast.error('Failed to load tenant details');
+      toast.error(getApiErrorMessage(error, 'Failed to load tenant details'));
     }
   };
 
@@ -67,7 +68,7 @@ const TenantApproval = () => {
         setSelectedTenant(null);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to approve organization');
+      toast.error(getApiErrorMessage(error, 'Failed to approve organization'));
     } finally {
       setProcessing(false);
     }
@@ -93,7 +94,7 @@ const TenantApproval = () => {
       setSelectedTenant(null);
       await Promise.all([fetchPendingTenants(), fetchRejectedTenants()]);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to reject organization');
+      toast.error(getApiErrorMessage(error, 'Failed to reject organization'));
     } finally {
       setProcessing(false);
     }

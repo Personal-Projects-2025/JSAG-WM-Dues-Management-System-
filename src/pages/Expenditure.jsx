@@ -14,6 +14,7 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const formatCurrency = (value) =>
   typeof value === 'number'
@@ -69,7 +70,7 @@ const Expenditure = () => {
         }))
       );
     } catch (error) {
-      toast.error('Failed to load expenditures');
+      toast.error(getApiErrorMessage(error, 'Failed to load expenditures'));
     } finally {
       setLoading(false);
     }
@@ -121,7 +122,7 @@ const Expenditure = () => {
       resetForm();
       fetchExpenditures();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(getApiErrorMessage(error, 'Operation failed'));
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +147,7 @@ const Expenditure = () => {
       toast.success('Expenditure deleted successfully');
       fetchExpenditures();
     } catch (error) {
-      toast.error('Failed to delete expenditure');
+      toast.error(getApiErrorMessage(error, 'Failed to delete expenditure'));
     }
   };
 

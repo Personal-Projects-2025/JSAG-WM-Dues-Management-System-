@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import { authService } from '../services/authService.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 import AuthLightShell from '../components/AuthLightShell.jsx';
 import AuthBrandLogo from '../components/AuthBrandLogo.jsx';
 
@@ -23,7 +24,7 @@ const ForgotPassword = () => {
       await authService.forgotPassword(email.trim().toLowerCase());
       setSent(true);
     } catch (err) {
-      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+      setError(getApiErrorMessage(err, 'Something went wrong. Please try again.'));
     } finally {
       setLoading(false);
     }

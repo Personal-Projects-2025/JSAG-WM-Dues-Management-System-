@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/apiErrors.js';
 
 const formatDate = (value, options = {}) =>
   value ? new Date(value).toLocaleDateString(undefined, options) : 'Not available';
@@ -53,7 +54,7 @@ const Reminders = () => {
       setSummary(summaryResponse.data);
       setLogs(logsResponse.data || []);
     } catch (error) {
-      toast.error('Failed to load reminder data');
+      toast.error(getApiErrorMessage(error, 'Failed to load reminder data'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ const Reminders = () => {
       }
       await fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to send reminders');
+      toast.error(getApiErrorMessage(error, 'Failed to send reminders'));
     } finally {
       setSending(false);
     }
