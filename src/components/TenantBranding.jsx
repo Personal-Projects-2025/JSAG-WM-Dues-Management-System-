@@ -78,7 +78,7 @@ export const useTenantBranding = () => {
   const rawLogo = tenant.config?.branding?.logo?.trim();
   const tenantLogoUrl =
     rawLogo && /^https?:\/\//i.test(rawLogo) ? rawLogo : null;
-  const name = tenant.config?.branding?.name || tenant.name || defaultName;
+  const name = tenant.name || tenant.config?.branding?.name || defaultName;
 
   return {
     primaryColor: tenant.config?.branding?.primaryColor || '#3B82F6',

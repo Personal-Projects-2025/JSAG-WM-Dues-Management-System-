@@ -116,7 +116,7 @@ const TenantRegistration = () => {
       name,
       slug:         slugTouched   ? prev.slug         : slug,
       databaseName: dbNameTouched ? prev.databaseName : slug.replace(/-/g, '_'),
-      branding: { ...prev.branding, name: prev.branding.name || name },
+      branding: { ...prev.branding, name },
     }));
   };
 
